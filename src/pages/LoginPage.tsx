@@ -49,18 +49,18 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="max-w-md w-full space-y-8">
         <div className="flex flex-col items-center">
           <img
             src="/logo.svg"
             alt="Campus Nexus Logo"
-            className="h-16 w-auto mb-4"
+            className="h-32 w-auto mb-4"
           />
-          <h1 className="text-2xl font-bold">Campus Nexus</h1>
+          <h1 className="text-2xl font-bold text-text">Campus Nexus</h1>
         </div>
         <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-text">
             Welcome to Campus Nexus
           </h2>
         </div>

@@ -27,8 +27,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, active }) =>
       className={cn(
         "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
         active
-          ? "bg-ccem-purple text-white"
-          : "text-gray-600 hover:text-ccem-purple hover:bg-gray-100"
+          ? "bg-border text-background hover: hover:bg-opacity-80"
+          : "hover:text-ccem-purple hover:bg-border/80 hover:text-background"
       )}
     >
       {icon}
@@ -44,12 +44,12 @@ const Sidebar: React.FC = () => {
   const isClubLeader = profile?.user.role === "CLUB_LEADER" || profile?.user.role === "ADMIN";
 
   return (
-    <div className="w-64 bg-white h-[calc(100vh-4rem)] border-r border-gray-200 flex flex-col overflow-y-auto">
+    <div className="bg-secondary w-64 h-[calc(100vh-4rem)] border-r border-gray-200 flex flex-col overflow-y-auto">
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold">
           {isStudent ? "Student Portal" : "Club Management"}
         </h2>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-border">
           {isStudent ? "Explore and join clubs" : "Manage your clubs"}
         </p>
       </div>
@@ -85,8 +85,8 @@ const Sidebar: React.FC = () => {
         
         {isClubLeader && (
           <>
-            <div className="pt-4 mt-4 border-t border-gray-200">
-              <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            <div className="pt-4 mt-4 border-t border-border">
+              <p className="px-3 text-[12px] font-semibold uppercase tracking-wider mb-2">
                 Management
               </p>
               
@@ -114,7 +114,7 @@ const Sidebar: React.FC = () => {
           </>
         )}
         
-        <div className="pt-4 mt-4 border-t border-gray-200">
+        <div className="pt-4 mt-4 border-t border-border">
           <SidebarItem
             to="/profile"
             icon={<Settings size={18} />}
