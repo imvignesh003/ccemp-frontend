@@ -1,0 +1,149 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 15 6% 14%; /* raisin_black */
+
+    --card: 0 0% 100%;
+    --card-foreground: 15 6% 14%; /* raisin_black */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 15 6% 14%; /* raisin_black */
+
+    --primary: 12 38% 28%; /* caput_mortuum */
+    --primary-foreground: 31 51% 90%; /* almond */
+
+    --secondary: 17 49% 58%; /* burnt_sienna */
+    --secondary-foreground: 31 51% 90%; /* almond */
+
+    --muted: 31 51% 90%; /* almond */
+    --muted-foreground: 12 38% 28%; /* caput_mortuum */
+
+    --accent: 17 49% 58%; /* burnt_sienna */
+    --accent-foreground: 31 51% 90%; /* almond */
+
+    --destructive: 6 100% 85%; /* melon */
+    --destructive-foreground: 15 6% 14%; /* raisin_black */
+
+    --border: 17 49% 58%; /* burnt_sienna */
+    --input: 17 49% 58%; /* burnt_sienna */
+    --ring: 12 38% 28%; /* caput_mortuum */
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 15 6% 14%; /* raisin_black */
+    --sidebar-foreground: 31 51% 90%; /* almond */
+    --sidebar-primary: 17 49% 58%; /* burnt_sienna */
+    --sidebar-primary-foreground: 31 51% 90%; /* almond */
+    --sidebar-accent: 17 49% 58%; /* burnt_sienna */
+    --sidebar-accent-foreground: 31 51% 90%; /* almond */
+    --sidebar-border: 12 38% 28%; /* caput_mortuum */
+    --sidebar-ring: 17 49% 58%; /* burnt_sienna */
+  }
+
+  .dark {
+    --background: 15 6% 14%; /* raisin_black */
+    --foreground: 31 51% 90%; /* almond */
+
+    --card: 15 6% 14%; /* raisin_black */
+    --card-foreground: 31 51% 90%; /* almond */
+
+    --popover: 15 6% 14%; /* raisin_black */
+    --popover-foreground: 31 51% 90%; /* almond */
+
+    --primary: 17 49% 58%; /* burnt_sienna */
+    --primary-foreground: 31 51% 90%; /* almond */
+
+    --secondary: 12 38% 28%; /* caput_mortuum */
+    --secondary-foreground: 31 51% 90%; /* almond */
+
+    --muted: 12 38% 28%; /* caput_mortuum */
+    --muted-foreground: 17 49% 58%; /* burnt_sienna */
+
+    --accent: 12 38% 28%; /* caput_mortuum */
+    --accent-foreground: 31 51% 90%; /* almond */
+
+    --destructive: 6 100% 85%; /* melon */
+    --destructive-foreground: 15 6% 14%; /* raisin_black */
+
+    --border: 12 38% 28%; /* caput_mortuum */
+    --input: 12 38% 28%; /* caput_mortuum */
+    --ring: 17 49% 58%; /* burnt_sienna */
+
+    --sidebar-background: 15 6% 14%; /* raisin_black */
+    --sidebar-foreground: 31 51% 90%; /* almond */
+    --sidebar-primary: 17 49% 58%; /* burnt_sienna */
+    --sidebar-primary-foreground: 31 51% 90%; /* almond */
+    --sidebar-accent: 12 38% 28%; /* caput_mortuum */
+    --sidebar-accent-foreground: 31 51% 90%; /* almond */
+    --sidebar-border: 12 38% 28%; /* caput_mortuum */
+    --sidebar-ring: 17 49% 58%; /* burnt_sienna */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:border-burnt_sienna;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+  
+  .animate-pulse-subtle {
+    animation: pulseSlight 2s infinite;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulseSlight {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+}

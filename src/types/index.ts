@@ -1,0 +1,148 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+export type UserRole = 'STUDENT' | 'CLUB_LEADER' | 'ADMIN';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
+export interface Club {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  logo?: string;
+  createdAt: string;
+  memberCount: number;
+  leaderId: string;
+  leaderIds?: string[]; // To support multiple leaders
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+export interface ExtendedClub extends Club {
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  clubId: string;
+  clubName: string;
+  registrationLimit: number;
+  registeredCount: number;
+  image?: string;
+  isRegistered?: boolean;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  clubId: string;
+  clubName: string;
+  date: string;
+  isFromUserClub?: boolean;
+  targetRole?: UserRole | null;
+}
+
+export interface ClubMember {
+  userId: string;
+  userName: string;
+  clubId: string;
+  joinedAt: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+export interface EventRegistration {
+  userId: string;
+  userName: string;
+  eventId: string;
+  registeredAt: string;
+  attended: boolean;
+}
+
+// Enhanced authority helper functions for more granular permissions
+// Club Management Permissions
+export const isClubLeader = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
+  return (userRole === 'CLUB_LEADER' || userRole === 'ADMIN') && isLeaderOfClub;
+};
+
+export const canManageClub = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
+  return userRole === 'ADMIN' || (userRole === 'CLUB_LEADER' && isLeaderOfClub);
+};
+
+export const canEditClubDetails = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
+  return canManageClub(userRole, isLeaderOfClub);
+};
+
+export const canManageClubMembers = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
+  return canManageClub(userRole, isLeaderOfClub);
+};
+
+// Event Management Permissions
+export const canCreateEvent = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
+  return userRole === 'ADMIN' || (userRole === 'CLUB_LEADER' && isLeaderOfClub);
+};
+
+export const canEditEvent = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
+  return canManageEvents(userRole, isLeaderOfClub);
+};
+
+export const canDeleteEvent = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
+  return canManageEvents(userRole, isLeaderOfClub);
+};
+
+export const canManageEvents = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
+  return userRole === 'ADMIN' || (userRole === 'CLUB_LEADER' && isLeaderOfClub);
+};
+
+// Announcement Permissions
+export const canCreateAnnouncement = (userRole: UserRole, isLeaderOfClub: boolean = false): boolean => {
+  return userRole === 'ADMIN' || (userRole === 'CLUB_LEADER' && isLeaderOfClub);
+};
+
+export const canEditAnnouncement = (userRole: UserRole, isLeaderOfClub: boolean, createdByUserId?: string, currentUserId?: string): boolean => {
+  return userRole === 'ADMIN' || 
+    (userRole === 'CLUB_LEADER' && isLeaderOfClub) || 
+    (createdByUserId !== undefined && currentUserId !== undefined && createdByUserId === currentUserId);
+};
+
+export const canDeleteAnnouncement = (userRole: UserRole, isLeaderOfClub: boolean, createdByUserId?: string, currentUserId?: string): boolean => {
+  return canEditAnnouncement(userRole, isLeaderOfClub, createdByUserId, currentUserId);
+};
+
+export const canPostAnnouncement = (userRole: UserRole, targetRole?: UserRole | null): boolean => {
+  if (userRole === 'ADMIN') {
+    // Admin can post to any role
+    return true;
+  }
+  
+  if (userRole === 'CLUB_LEADER') {
+    // Club leaders can post to students or no specific target
+    return !targetRole || targetRole === 'STUDENT';
+  }
+  
+  return false;
+};
+
+// User Management Permissions
+export const canManageUsers = (userRole: UserRole): boolean => {
+  return userRole === 'ADMIN';
+};
+
+export const canAssignLeaders = (userRole: UserRole): boolean => {
+  return userRole === 'ADMIN';
+};
+
+export const canJoinClub = (_userRole: UserRole): boolean => {
+  return true; // All users can join clubs
+};
+
+export const canRegisterForEvent = (_userRole: UserRole): boolean => {
+  return true; // All users can register for events
+};
