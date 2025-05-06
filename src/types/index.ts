@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-export type UserRole = 'STUDENT' | 'CLUB_LEADER' | 'ADMIN';
+export type UserRole = 'STUDENT' | 'LEAD' | 'ADMIN';
 
 export interface User {
   id: string;
@@ -69,11 +69,11 @@ export interface EventRegistration {
 // Enhanced authority helper functions for more granular permissions
 // Club Management Permissions
 export const isClubLeader = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
-  return (userRole === 'CLUB_LEADER' || userRole === 'ADMIN') && isLeaderOfClub;
+  return (userRole === 'LEAD' || userRole === 'ADMIN') && isLeaderOfClub;
 };
 
 export const canManageClub = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
-  return userRole === 'ADMIN' || (userRole === 'CLUB_LEADER' && isLeaderOfClub);
+  return userRole === 'ADMIN' || (userRole === 'LEAD' && isLeaderOfClub);
 };
 
 export const canEditClubDetails = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
@@ -86,7 +86,7 @@ export const canManageClubMembers = (userRole: UserRole, isLeaderOfClub: boolean
 
 // Event Management Permissions
 export const canCreateEvent = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
-  return userRole === 'ADMIN' || (userRole === 'CLUB_LEADER' && isLeaderOfClub);
+  return userRole === 'ADMIN' || (userRole === 'LEAD' && isLeaderOfClub);
 };
 
 export const canEditEvent = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
@@ -98,17 +98,17 @@ export const canDeleteEvent = (userRole: UserRole, isLeaderOfClub: boolean): boo
 };
 
 export const canManageEvents = (userRole: UserRole, isLeaderOfClub: boolean): boolean => {
-  return userRole === 'ADMIN' || (userRole === 'CLUB_LEADER' && isLeaderOfClub);
+  return userRole === 'ADMIN' || (userRole === 'LEAD' && isLeaderOfClub);
 };
 
 // Announcement Permissions
 export const canCreateAnnouncement = (userRole: UserRole, isLeaderOfClub: boolean = false): boolean => {
-  return userRole === 'ADMIN' || (userRole === 'CLUB_LEADER' && isLeaderOfClub);
+  return userRole === 'ADMIN' || (userRole === 'LEAD' && isLeaderOfClub);
 };
 
 export const canEditAnnouncement = (userRole: UserRole, isLeaderOfClub: boolean, createdByUserId?: string, currentUserId?: string): boolean => {
   return userRole === 'ADMIN' || 
-    (userRole === 'CLUB_LEADER' && isLeaderOfClub) || 
+    (userRole === 'LEAD' && isLeaderOfClub) || 
     (createdByUserId !== undefined && currentUserId !== undefined && createdByUserId === currentUserId);
 };
 
@@ -122,7 +122,7 @@ export const canPostAnnouncement = (userRole: UserRole, targetRole?: UserRole | 
     return true;
   }
   
-  if (userRole === 'CLUB_LEADER') {
+  if (userRole === 'LEAD') {
     // Club leaders can post to students or no specific target
     return !targetRole || targetRole === 'STUDENT';
   }

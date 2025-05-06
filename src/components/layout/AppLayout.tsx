@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -17,26 +16,27 @@ const AppLayout: React.FC = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  
+
   // Close sidebar on route change on mobile
   useEffect(() => {
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
     }
   }, [location.pathname]);
-  
+
   // Show welcome toast when user logs in
   useEffect(() => {
     if (isAuthenticated) {
-      const welcomeShown = sessionStorage.getItem('welcomeShown');
-      
+      const welcomeShown = sessionStorage.getItem("welcomeShown");
+
       if (!welcomeShown) {
         toast({
           title: "Welcome to CCEM",
-          description: "Navigate using the sidebar to explore clubs and events.",
+          description:
+            "Navigate using the sidebar to explore clubs and events.",
         });
-        
-        sessionStorage.setItem('welcomeShown', 'true');
+
+        sessionStorage.setItem("welcomeShown", "true");
       }
     }
   }, [isAuthenticated, toast]);
@@ -51,28 +51,28 @@ const AppLayout: React.FC = () => {
       <div className="flex flex-1 relative">
         {/* Mobile sidebar backdrop */}
         {sidebarOpen && (
-          <div 
+          <div
             className="md:hidden fixed inset-0 bg-black/30 z-20"
             onClick={() => setSidebarOpen(false)}
           />
         )}
-      
+
         {/* Sidebar */}
-        <div 
+        <div
           className={`fixed md:static z-30 transition-transform duration-300 ease-in-out transform ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }`}
         >
           <Sidebar />
         </div>
-        
+
         {/* Main content */}
         <main className="flex-1 p-4 md:p-6">
           <div className="md:hidden mb-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={toggleSidebar} 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleSidebar}
               className="flex items-center gap-2"
             >
               {sidebarOpen ? (

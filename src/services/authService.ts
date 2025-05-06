@@ -40,6 +40,7 @@ const authService = {
   },
   
   signup: async (userData: SignupRequest): Promise<LoginResponse> => {
+    console.log('Signup credentials:', userData);
     const response = await api.post('/auth/signup', userData);
     if (response.data.token) {
       localStorage.setItem('auth_token', response.data.token);
@@ -48,7 +49,7 @@ const authService = {
   },
   
   logout: async (): Promise<void> => {
-    api.post('/auth/logout', {token: localStorage.getItem('auth_token')});
+    api.post('/auth/logout');
     localStorage.removeItem('auth_token');
   },
   

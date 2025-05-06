@@ -4,8 +4,8 @@ export type Profile = {
     id: string;
     name: string;
     email: string;
-    role: 'STUDENT' | 'CLUB_LEADER' | 'ADMIN';
-    profile_image?: string;
+    role: 'STUDENT' | 'LEAD' | 'ADMIN';
+    contact:string;
     created_at?: string;
     updated_at?: string;
 };
@@ -13,17 +13,17 @@ export type User = {
   id : number;
   name : string;
   email : string;
+  contact: string;
   password : string;
-  role : 'STUDENT' | 'CLUB_LEADER' | 'ADMIN';
+  role : 'STUDENT' | 'LEAD' | 'ADMIN';
   enabled : boolean;
   accountNonLocked : boolean;
   accountNonExpired : boolean;
   credentialsNonExpired : boolean;
   authorities : {
-    authority : 'STUDENT' | 'CLUB_LEADER' | 'ADMIN';
+    authority : 'STUDENT' | 'LEAD' | 'ADMIN';
   }[];
   username : string;
-  profile_image?: string;
   created_at?: string;
   updated_at?: string;
 };
