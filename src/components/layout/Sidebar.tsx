@@ -41,7 +41,7 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const { profile } = useAuth();
   const isStudent = profile?.user.role === "STUDENT";
-  const isClubLeader = profile?.user.role === "CLUB_LEADER" || profile?.user.role === "ADMIN";
+  const isClubLeader = profile?.user.role === "LEAD" || profile?.user.role === "ADMIN";
 
   return (
     <div className="bg-secondary w-64 h-[calc(100vh-4rem)] border-r border-gray-200 flex flex-col overflow-y-auto">

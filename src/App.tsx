@@ -97,12 +97,12 @@ const AppRoutes = () => (
       <Route path="clubs" element={<ClubsPage />} />
       <Route path="clubs/:id" element={<ClubDetail />} />
       <Route path="manage-clubs" element={
-        <RoleProtectedRoute allowedRoles={['CLUB_LEADER', 'ADMIN']}>
+        <RoleProtectedRoute allowedRoles={['LEAD', 'ADMIN']}>
           <ManageClubsPage />
         </RoleProtectedRoute>
       } />
       <Route path="manage-clubs/:id" element={
-        <RoleProtectedRoute allowedRoles={['CLUB_LEADER', 'ADMIN']}>
+        <RoleProtectedRoute allowedRoles={['LEAD', 'ADMIN']}>
           <ManageClubsPage />
         </RoleProtectedRoute>
       } />
@@ -113,13 +113,13 @@ const AppRoutes = () => (
       <Route
         path="create-event"
         element={
-          <RoleProtectedRoute allowedRoles={["CLUB_LEADER", "ADMIN"]}>
+          <RoleProtectedRoute allowedRoles={["LEAD", "ADMIN"]}>
             <CreateEvent />
           </RoleProtectedRoute>
         }
       />
       <Route path="manage-events" element={
-        <RoleProtectedRoute allowedRoles={['CLUB_LEADER', 'ADMIN']}>
+        <RoleProtectedRoute allowedRoles={['LEAD', 'ADMIN']}>
           <ManageClubsPage />
         </RoleProtectedRoute>
       } />
@@ -127,7 +127,7 @@ const AppRoutes = () => (
       {/* Announcement Routes */}
       <Route path="announcements" element={<AnnouncementsPage  />} />
       {/* <Route path="create-announcement" element={
-        <RoleProtectedRoute allowedRoles={['CLUB_LEADER', 'ADMIN']}>
+        <RoleProtectedRoute allowedRoles={['LEAD', 'ADMIN']}>
           <CreateAnnouncementForm />
         </RoleProtectedRoute>
       } /> */}

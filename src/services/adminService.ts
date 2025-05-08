@@ -15,7 +15,11 @@ const adminService = {
         return response.data;
     },
     changeUserRole : async (id:string, role:UserRole) : Promise<boolean> => {
-        const response = await api.put(`/admin/profiles/${id}`, role);
+        const response = await api.put(`/admin/profile/${id}`,{ role });
+        return response.data;
+    },
+    getAllLeads : async (): Promise<Profile[]> => {
+        const response = await api.get('/admin/profile/leads');
         return response.data;
     }
 }

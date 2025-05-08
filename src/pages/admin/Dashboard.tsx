@@ -114,36 +114,36 @@ const AdminDashboard: React.FC = () => {
         <AdminAnalytics />
       </div> */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card className="col-span-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 ">
+        <Card className="col-span-1 bg-secondary/80">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common management tasks</CardDescription>
+            <CardTitle className="text-border text-3xl">Quick Actions</CardTitle>
+            <CardDescription className="text-border">Common management tasks</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Link to="/admin/users" className="block">
-              <Button className="w-full flex justify-between items-center bg-ccem-purple hover:bg-ccem-purple/90">
+              <Button className="w-full flex justify-between items-center text-background bg-border hover:bg-border/70">
                 <span>Manage Users</span>
                 <Shield className="h-4 w-4" />
               </Button>
             </Link>
 
             <Link to="/manage-clubs" className="block">
-              <Button className="w-full flex justify-between items-center bg-ccem-purple hover:bg-ccem-purple/90">
+              <Button className="w-full flex justify-between items-center text-background bg-border hover:bg-border/70">
                 <span>Manage Clubs</span>
                 <Briefcase className="h-4 w-4" />
               </Button>
             </Link>
 
             <Link to="/create-announcement" className="block">
-              <Button className="w-full flex justify-between items-center bg-ccem-purple hover:bg-ccem-purple/90">
+              <Button className="w-full flex justify-between items-center text-background bg-border hover:bg-border/70">
                 <span>Send Announcement</span>
                 <Bell className="h-4 w-4" />
               </Button>
             </Link>
 
             <Link to="/create-event" className="block">
-              <Button className="w-full flex justify-between items-center bg-ccem-purple hover:bg-ccem-purple/90">
+              <Button className="w-full flex justify-between items-center text-background bg-border hover:bg-border/70">
                 <span>Create Event</span>
                 <Calendar className="h-4 w-4" />
               </Button>
@@ -151,16 +151,16 @@ const AdminDashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1">
+        <Card className="col-span-1 bg-secondary/80">
           <CardHeader>
-            <CardTitle>System Overview</CardTitle>
-            <CardDescription>Status and pending approvals</CardDescription>
+            <CardTitle className="text-border text-3xl">System Overview</CardTitle>
+            <CardDescription className="text-border">Status and pending approvals</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="space-y-6 mt-8 ">
+              <div className="flex items-center justify-between text-background bg-border px-4 p-3 rounded-[8px]">
                 <div className="flex items-center">
-                  <UserPlus className="h-5 w-5 mr-2 text-ccem-purple" />
+                  <UserPlus className="h-5 w-5 mr-2 text-background" />
                   <span>Pending Leader Requests</span>
                 </div>
                 <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2 py-1 rounded">
@@ -168,9 +168,9 @@ const AdminDashboard: React.FC = () => {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between text-background bg-border px-4 p-3 rounded-[8px]">
                 <div className="flex items-center">
-                  <Briefcase className="h-5 w-5 mr-2 text-ccem-purple" />
+                  <Briefcase className="h-5 w-5 mr-2 text-background" />
                   <span>Pending Club Approvals</span>
                 </div>
                 <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2 py-1 rounded">

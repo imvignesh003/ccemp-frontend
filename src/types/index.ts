@@ -13,12 +13,9 @@ export interface Club {
   name: string;
   description: string;
   category: string;
-  logo?: string;
   createdAt: string;
   memberCount: number;
-  leaderId: string;
-  leaderIds?: string[]; // To support multiple leaders
-  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  leadId: string;
 }
 
 export interface ExtendedClub extends Club {

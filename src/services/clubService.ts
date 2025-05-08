@@ -7,6 +7,11 @@ const clubService = {
     const response = await api.get('/clubs');
     return response.data;
   },
+
+  getMyClubs: async (id: number): Promise<Club[]> => {
+    const response = await api.get(`/clubs/${id}`);
+    return response.data;
+  },
   
   getClubById: async (id: string): Promise<Club> => {
     const response = await api.get(`/clubs/${id}`);
@@ -19,6 +24,7 @@ const clubService = {
   },
   
   createClub: async (clubData: Partial<Club>): Promise<Club> => {
+    console.log(clubData)
     const response = await api.post('/clubs', clubData);
     return response.data;
   },

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { useToast } from "../../components/ui/use-toast";
 import { Button } from "../../components/ui/button";
@@ -43,7 +42,7 @@ const ClubsPage: React.FC = () => {
   const fetchClubs = async () => {
     try {
       setLoading(true);
-
+      
       // Fetch all clubs
       // Mockup data for clubs
       const clubsData = [

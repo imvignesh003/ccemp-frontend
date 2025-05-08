@@ -143,14 +143,14 @@ const ManageUsersPage: React.FC = () => {
         </div>
       </div>
       
-      <Card className="mb-6 bg-secondary">
+      <Card className="mb-6 bg-secondary/90 text-border">
         <CardHeader>
           <CardTitle>User Search</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 ">
-            <div className="flex-1 relative bg-background rounded-[5px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <div className="flex-1 relative rounded-[5px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-border" size={18} />
               <Input
                 className="pl-10"
                 placeholder="Search users by name or email..."
@@ -160,13 +160,13 @@ const ManageUsersPage: React.FC = () => {
             </div>
             
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="w-full md:w-48 bg-border text-secondary ring-offset-border">
                 <div className="flex items-center gap-2">
                   <Filter size={18} />
                   <SelectValue placeholder="Filter by role" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="bg-secondary">
+              <SelectContent className="bg-border text-background">
                 <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="STUDENT">Students</SelectItem>
                 <SelectItem value="LEAD">Club Leaders</SelectItem>
@@ -178,7 +178,7 @@ const ManageUsersPage: React.FC = () => {
       </Card>
       
       <Card>
-        <CardContent className="p-0 bg-secondary">
+        <CardContent className="p-0 bg-secondary/80 border-border rounded-[8px]">
           {loading ? (
             <div className="p-6 text-center">
               <p>Loading users...</p>
@@ -186,33 +186,33 @@ const ManageUsersPage: React.FC = () => {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow >
+                  <TableHead className="font-bold">Name</TableHead>
+                  <TableHead className="font-bold">Email</TableHead>
+                  <TableHead className="font-bold">Role</TableHead>
+                  <TableHead className="text-right font-bold">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-semibold">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-background text-border flex items-center justify-center text-xs">
+                          <div className="w-8 h-8 rounded-full bg-border text-background flex items-center justify-center text-xs">
                             {user.name.charAt(0)}
                           </div>
                           <span>{user.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{user.email}</TableCell>
+                      <TableCell className="font-semibold">{user.email}</TableCell>
                       <TableCell>
                         {editingUser === user.id ? (
                           <Select value={newRole} onValueChange={(value) => setNewRole(value as UserRole)}>
-                            <SelectTrigger className="w-36">
+                            <SelectTrigger className="w-36 bg-border text-background ring-offset-border">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-background">
+                            <SelectContent className="bg-border text-background">
                               <SelectItem value="STUDENT">Student</SelectItem>
                               <SelectItem value="LEAD">Club Leader</SelectItem>
                               <SelectItem value="ADMIN">Admin</SelectItem>
@@ -249,6 +249,7 @@ const ManageUsersPage: React.FC = () => {
                           </div>
                         ) : (
                           <Button 
+                            className="bg-border text-background hover:bg-border/60"
                             variant="outline" 
                             size="sm"
                             onClick={() => handleStartEditing(user.id, user.role as UserRole)}
