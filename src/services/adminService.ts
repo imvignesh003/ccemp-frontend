@@ -21,6 +21,10 @@ const adminService = {
     getAllLeads : async (): Promise<Profile[]> => {
         const response = await api.get('/admin/profile/leads');
         return response.data;
+    },
+    getProfileById : async (id : string): Promise<Profile> => {
+        const response = await api.get(`/profile/${id}`);
+        return response.data;
     }
 }
 

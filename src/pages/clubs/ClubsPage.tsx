@@ -20,6 +20,8 @@ import { Search, Filter } from "lucide-react";
 import { ExtendedClub } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import ClubCard from "../../components/shared/ClubCard";
+import clubService from "@/services/clubService";
+
 
 const ClubsPage: React.FC = () => {
   const { profile } = useAuth();
@@ -40,266 +42,84 @@ const ClubsPage: React.FC = () => {
   }, [profile]);
 
   const fetchClubs = async () => {
+    //done
+    if (!profile) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      
-      // Fetch all clubs
-      // Mockup data for clubs
-      const clubsData = [
-        {
-          id: 1,
-          name: "Tech Enthusiasts",
-          description: "A club for technology lovers.",
-          category: "Technology",
-          logo: "https://via.placeholder.com/150",
-          created_at: "2023-01-01",
-          leader_id: "user1",
-        },
-        {
-          id: 2,
-          name: "Art and Design",
-          description: "Exploring creativity through art.",
-          category: "Art",
-          logo: "https://via.placeholder.com/150",
-          created_at: "2023-02-01",
-          leader_id: "user2",
-        },
-        {
-          id: 3,
-          name: "Sports Club",
-          description: "For all sports enthusiasts.",
-          category: "Sports",
-          logo: "https://via.placeholder.com/150",
-          created_at: "2023-03-01",
-          leader_id: "user3",
-        },
-      ];
-      const clubsError = null;
 
-      if (clubsError) throw clubsError;
+      const data = await clubService.getAllClubs();
 
-      // Get member counts in a separate query
-      const memberCountsPromises = clubsData.map(async (club: { id: any }) => {
-        // Mockup member counts for clubs
-        const mockMemberCounts = {
-          1: 25, // Club ID 1 has 25 members
-          2: 15, // Club ID 2 has 15 members
-          3: 30, // Club ID 3 has 30 members
-        };
+      if (!data) {
+        console.error("Error fetching clubs: Eoor Fetching Clubs");
+        throw new Error("Error fetching clubs: Eoor Fetching Clubs");
+      }
 
+      if (data) {
+        // Fetch member counts and member data from clubService
+        const memberCountsPromises = data.map(async (club) => {
+          try {
+        const memberData = await clubService.getClubMemberDetails(club.id); // Fetch members for the club
         return {
           clubId: club.id,
-          count:
-            mockMemberCounts[club.id as keyof typeof mockMemberCounts] || 0,
+          count: memberData.length || 0, // Use the length of the member data array
         };
-      });
-
-      const memberCounts = await Promise.all(memberCountsPromises);
-
-      // Format clubs data
-      const formattedClubs = clubsData.map(
-        (club: {
-          id: any;
-          name: any;
-          description: any;
-          category: any;
-          logo: any;
-          created_at: any;
-          leader_id: any;
-        }) => {
-          const countObj = memberCounts.find(
-            (c: { clubId: any }) => c.clubId === club.id
-          );
-          return {
-            id: club.id,
-            name: club.name,
-            description: club.description,
-            category: club.category,
-            logo: club.logo,
-            createdAt: club.created_at,
-            leaderId: club.leader_id,
-            memberCount: countObj ? countObj.count : 0,
-          };
-        }
-      ) as ExtendedClub[];
-
-      setClubs(formattedClubs);
-
-      // Extract categories
-      const uniqueCategories = Array.from(
-        new Set(formattedClubs.map((club) => club.category))
-      );
-      setCategories(uniqueCategories);
-
-      // If user is logged in, fetch user's memberships
-      if (profile) {
-        // Mockup data for club memberships
-        const membershipData = [
-          {
-            club_id: 1,
-            status: "APPROVED",
-            clubs: {
-              id: 1,
-              name: "Tech Enthusiasts",
-              description: "A club for technology lovers.",
-              category: "Technology",
-              logo: "https://via.placeholder.com/150",
-              created_at: "2023-01-01",
-              leader_id: "user1",
-            },
-          },
-          {
-            club_id: 2,
-            status: "PENDING",
-            clubs: {
-              id: 2,
-              name: "Art and Design",
-              description: "Exploring creativity through art.",
-              category: "Art",
-              logo: "https://via.placeholder.com/150",
-              created_at: "2023-02-01",
-              leader_id: "user2",
-            },
-          },
-        ];
-        const membershipError = null;
-
-        if (!membershipError && membershipData) {
-          const myClubsList = membershipData
-            .filter((item: { status: string }) => item.status === "APPROVED")
-            .map(
-              (item: {
-                club_id: any;
-                clubs: {
-                  id: any;
-                  name: any;
-                  description: any;
-                  category: any;
-                  logo: any;
-                  created_at: any;
-                  leader_id: any;
-                };
-                status: any;
-              }) => {
-                const countObj = memberCounts.find(
-                  (c: { clubId: any }) => c.clubId === item.club_id
-                );
-                return {
-                  id: item.clubs.id,
-                  name: item.clubs.name,
-                  description: item.clubs.description,
-                  category: item.clubs.category,
-                  logo: item.clubs.logo,
-                  createdAt: item.clubs.created_at,
-                  leaderId: item.clubs.leader_id,
-                  memberCount: countObj ? countObj.count : 0,
-                  status: item.status,
-                } as ExtendedClub;
-              }
-            );
-
-          setMyClubs(myClubsList);
-
-          // For club leaders, also get clubs they manage
-          if (isClubLeader) {
-            // Mockup data for managed clubs
-            const managedClubsData = [
-              {
-              id: 1,
-              name: "Tech Enthusiasts",
-              description: "A club for technology lovers.",
-              category: "Technology",
-              logo: "https://via.placeholder.com/150",
-              created_at: "2023-01-01",
-              leader_id: "user1",
-              },
-              {
-              id: 3,
-              name: "Sports Club",
-              description: "For all sports enthusiasts.",
-              category: "Sports",
-              logo: "https://via.placeholder.com/150",
-              created_at: "2023-03-01",
-              leader_id: "user3",
-              },
-            ];
-            const managedError = null;
-
-            if (!managedError && managedClubsData) {
-              let managedClubsList = [];
-
-              if (isAdmin) {
-                // Admin can see and manage all clubs
-                managedClubsList = managedClubsData.map(
-                  (club: {
-                    id: any;
-                    name: any;
-                    description: any;
-                    category: any;
-                    logo: any;
-                    created_at: any;
-                    leader_id: any;
-                  }) => {
-                    const countObj = memberCounts.find(
-                      (c: { clubId: any }) => c.clubId === club.id
-                    );
-                    return {
-                      id: club.id,
-                      name: club.name,
-                      description: club.description,
-                      category: club.category,
-                      logo: club.logo,
-                      createdAt: club.created_at,
-                      leaderId: club.leader_id,
-                      memberCount: countObj ? countObj.count : 0,
-                    } as ExtendedClub;
-                  }
-                );
-              } else {
-                // Club leaders can only see clubs they lead
-                managedClubsList = managedClubsData
-                  .filter(
-                    (club: { leader_id: string }) =>
-                      club.leader_id == profile.user.id.toString()
-                  )
-                  .map(
-                    (club: {
-                      id: any;
-                      name: any;
-                      description: any;
-                      category: any;
-                      logo: any;
-                      created_at: any;
-                      leader_id: any;
-                    }) => {
-                      const countObj = memberCounts.find(
-                        (c: { clubId: any }) => c.clubId === club.id
-                      );
-                      return {
-                        id: club.id,
-                        name: club.name,
-                        description: club.description,
-                        category: club.category,
-                        logo: club.logo,
-                        createdAt: club.created_at,
-                        leaderId: club.leader_id,
-                        memberCount: countObj ? countObj.count : 0,
-                      } as ExtendedClub;
-                    }
-                  );
-              }
-
-              setManagedClubs(managedClubsList);
-            }
+          } catch (error) {
+        console.error(`Error fetching members for club ${club.id}:`, error);
+        return {
+          clubId: club.id,
+          count: 0,
+        };
           }
-        }
+        });
+
+        const memberCounts = await Promise.all(memberCountsPromises);
+
+        const formattedClubs = data.map((club) => {
+          const countObj = memberCounts.find((c) => c.clubId === club.id);
+          return {
+        id: club.id,
+        name: club.name,
+        description: club.description,
+        category: club.category,
+        createdAt: club.createdAt,
+        lead: club.lead,
+        memberCount: countObj ? countObj.count : 0,
+          };
+        });
+        formattedClubs.sort((a, b) => a.name.localeCompare(b.name));
+
+        setClubs(formattedClubs);
+        setManagedClubs(
+          formattedClubs.filter((club) => Number(club.lead.id) === profile.user.id)
+        );
+        const myClubsData = await Promise.all(
+          formattedClubs.map(async (club) => {
+            const memberData = await clubService.getClubMemberDetails(club.id);
+            return memberData.some((member) => member.profile.id === profile.user.id)
+              ? club
+              : null;
+          })
+        ).then((clubs) => clubs.filter((club) => club !== null));
+        setMyClubs(myClubsData);
+        setCategories([...new Set(formattedClubs.map((club) => club.category))]);
+        console.log("Managed Clubs", formattedClubs);
       }
+
+        // // Select first club by default if none selected
+        // if (formattedClubs.length > 0 && !selectedClub) {
+        //   setSelectedClub(formattedClubs[0]);
+        // }
+
     } catch (error) {
       console.error("Error fetching clubs:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to load clubs. Please try again.",
+        description: "Failed to load your clubs. Please try again later.",
       });
     } finally {
       setLoading(false);
@@ -362,13 +182,13 @@ const ClubsPage: React.FC = () => {
           </div>
 
           <Select onValueChange={handleCategoryChange} defaultValue="all">
-            <SelectTrigger className="w-full md:w-48">
+            <SelectTrigger className="w-full md:w-48 bg-secondary text-background">
               <div className="flex items-center gap-2">
                 <Filter size={18} />
                 <SelectValue placeholder="Filter by category" />
               </div>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-secondary text-background ">
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
@@ -383,7 +203,7 @@ const ClubsPage: React.FC = () => {
           {filteredClubs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredClubs.map((club) => (
-                <ClubCard key={club.id} club={club} />
+                <ClubCard key={club.id} club={club}/>
               ))}
             </div>
           ) : (
@@ -441,7 +261,7 @@ const ClubsPage: React.FC = () => {
                         .includes(searchTerm.toLowerCase()))
                 )
                 .map((club) => (
-                  <ClubCard key={club.id} club={club}>
+                  <ClubCard key={club.id} club={club} >
                     <Badge className="bg-ccem-purple text-xs absolute top-3 right-3">
                       You Manage
                     </Badge>

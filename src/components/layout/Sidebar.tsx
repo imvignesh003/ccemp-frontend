@@ -44,7 +44,7 @@ const Sidebar: React.FC = () => {
   const isClubLeader = profile?.user.role === "LEAD" || profile?.user.role === "ADMIN";
 
   return (
-    <div className="bg-secondary w-64 h-[calc(100vh-4rem)] border-r border-gray-200 flex flex-col overflow-y-auto">
+    <div className="bg-secondary w-64 h-[calc(100vh-4rem)] border-r border-border flex flex-col overflow-y-auto">
       <div className="p-4">
         <h2 className="text-lg font-semibold">
           {isStudent ? "Student Portal" : "Club Management"}

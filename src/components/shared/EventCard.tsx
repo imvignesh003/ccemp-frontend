@@ -1,11 +1,12 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { Clock, MapPin, Users } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "../../components/ui/card";
 import { Event } from "../../types";
 import { format, isPast } from "date-fns";
+import AutoEventImage from "../event/AutoImage";
 
 interface EventCardProps {
   event: Event;
@@ -45,7 +46,8 @@ const EventCard: React.FC<EventCardProps> = ({
           />
         ) : (
           <div className="h-full flex items-center justify-center">
-            <Calendar className="h-12 w-12 text-gray-300" />
+            {/* <Calendar className="h-12 w-12 text-gray-300" /> */}
+            <AutoEventImage title={event.title} />
           </div>
         )}
         <div className="absolute top-0 left-0 p-2">

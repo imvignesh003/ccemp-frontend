@@ -32,7 +32,7 @@ const profileService = {
     }
     return response.data;
   }
-
+  
   
 };
 export default profileService;

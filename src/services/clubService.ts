@@ -1,6 +1,22 @@
 
 import api from './api';
-import { Club } from '../types';
+import { Club, UserRole } from '../types';
+
+
+
+export interface MemberData {
+  id: string;
+  profile : {
+    id: number;
+    name: string;
+    email: string;
+    contact: string;
+    role: UserRole;
+  };
+  club : Club;
+  status : 'PENDING' | 'APPROVED' | 'REJECTED' | 'NONE';
+  joinedAt : Date;
+}
 
 const clubService = {
   getAllClubs: async (): Promise<Club[]> => {
@@ -17,6 +33,42 @@ const clubService = {
     const response = await api.get(`/clubs/${id}`);
     return response.data;
   },
+
+  getClubMembersCount: async (id: string): Promise<number> => {
+    const response = await api.get(`/clubs/${id}/members/count`);
+    return response.data;
+  },
+
+  getClubMemberDetails: async(id:string): Promise<MemberData[]> => {
+    const response = await api.get(`/clubs/${id}/members`);
+    console.log("response"+ response.data);
+    return response.data;
+  },
+
+  joinClub: async (clubId: string, userId: number): Promise<boolean> => {
+    console.log(clubId, userId);
+    const response = await api.post(`/clubs/${clubId}/join`, { userId });
+    return response.data;
+  },
+
+  approve : async (clubId: string, userId: number): Promise<boolean> => {
+    const response = await api.post(`/clubs/${clubId}/approve`, { userId });
+    return response.data;
+  },
+
+  reject : async (clubId: string, userId: number): Promise<boolean> => {
+    const response = await api.post(`/clubs/${clubId}/reject`, { userId });
+    return response.data;
+  },
+
+  remove : async (clubId: string, userId: number): Promise<boolean> => {
+    const response = await api.post(`/clubs/${clubId}/remove`, { userId });
+    return response.data;
+  },
+
+
+
+
   
   getUserClubs: async (): Promise<Club[]> => {
     const response = await api.get('/clubs/user');
@@ -38,9 +90,7 @@ const clubService = {
     await api.delete(`/clubs/${id}`);
   },
   
-  joinClub: async (clubId: string): Promise<void> => {
-    await api.post(`/clubs/${clubId}/join`);
-  },
+
   
   leaveClub: async (clubId: string): Promise<void> => {
     await api.post(`/clubs/${clubId}/leave`);

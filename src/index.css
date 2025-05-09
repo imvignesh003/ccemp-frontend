@@ -7,6 +7,8 @@
   --color-border: #3B413C;
   --color-primary: #63372C;
   --color-secondary: #C97D60;
+  --color-one: #A33B20;
+  --color-two: #DEEFB7;
 }
 
 @layer base {

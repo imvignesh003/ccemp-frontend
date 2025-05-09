@@ -1,3 +1,6 @@
+import { Profile } from "@/services/adminService";
+
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export type UserRole = 'STUDENT' | 'LEAD' | 'ADMIN';
 
@@ -15,7 +18,7 @@ export interface Club {
   category: string;
   createdAt: string;
   memberCount: number;
-  leadId: string;
+  lead : Profile;
 }
 
 export interface ExtendedClub extends Club {

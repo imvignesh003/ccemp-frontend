@@ -32,8 +32,8 @@ const Navbar: React.FC = () => {
                   className="w-32 h-32"
                 />
               </div>
-              <span className="text-xl font-bold">
-                Campus Clubs & Events Manager
+              <span className="text-4xl font-bold">
+                Campus Nexus
               </span>
             </Link>
           </div>

@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { Club, ClubMember } from "@/types";
+import { Club } from "@/types";
 import {
   Table,
   TableBody,
@@ -21,7 +21,7 @@ import {
 import { Check, X, Edit, Plus } from "lucide-react";
 import { format } from "date-fns";
 import CreateClub from "@/components/club/CreateClub";
-import clubService from "@/services/clubService";
+import clubService, { MemberData } from "@/services/clubService";
 import EditClub from "@/components/club/EditClub";
 
 const ManageClubsPage: React.FC = () => {
@@ -35,10 +35,10 @@ const ManageClubsPage: React.FC = () => {
 
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<ClubMember[]>([]);
-  const [clubMembers, setClubMembers] = useState<ClubMember[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<MemberData[]>([]);
+  const [clubMembers, setClubMembers] = useState<MemberData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processingRequest, setProcessingRequest] = useState<string | null>(
+  const [processingRequest, setProcessingRequest] = useState<number | null>(
     null
   );
 
@@ -58,7 +58,7 @@ const ManageClubsPage: React.FC = () => {
     }
   }, [selectedClub]);
 
-  const fetchClubs = async () => {
+  const fetchClubs = async () => { //done 
     //done
     if (!user || !profile) {
       setLoading(false);
@@ -83,13 +83,10 @@ const ManageClubsPage: React.FC = () => {
         throw new Error("Error fetching clubs: Eoor Fetching Clubs");
       }
 
-      if (data) {
-        //pending
+      if (data) { //done
         // Get member counts
         const memberCountsPromises = data.map(async (club) => {
-          // Mockup data for member counts
-          const count = 24; // Random member count for demonstration
-
+          const count = await clubService.getClubMembersCount(club.id);
           return {
             clubId: club.id,
             count: count || 0,
@@ -106,7 +103,7 @@ const ManageClubsPage: React.FC = () => {
             description: club.description,
             category: club.category,
             createdAt: club.createdAt,
-            leadId: club.leadId,
+            lead: club.lead, 
             memberCount: countObj ? countObj.count : 0,
           };
         });
@@ -131,83 +128,46 @@ const ManageClubsPage: React.FC = () => {
     }
   };
 
-  const fetchClubDetails = async () => {
+  const fetchClubDetails = async () => { //done
     if (!selectedClub) return;
 
     try {
       setLoading(true);
 
-      // Fetch pending membership requests
-      // Mockup data for pending membership requests
-      const pendingData = [
-        {
-          user_id: "user1",
-          club_id: selectedClub.id,
-          status: "PENDING",
-          joined_at: new Date().toISOString(),
-          profiles: {
-            name: "John Doe",
-            email: "john.doe@example.com",
-          },
-        },
-        {
-          user_id: "user2",
-          club_id: selectedClub.id,
-          status: "PENDING",
-          joined_at: new Date().toISOString(),
-          profiles: {
-            name: "Jane Smith",
-            email: "jane.smith@example.com",
-          },
-        },
-      ];
+      const data = await clubService.getClubMemberDetails(selectedClub.id);
+      console.log(data);
 
-      // Format pending requests
-      const formattedRequests = pendingData.map((request) => ({
-        userId: request.user_id,
-        userName: request.profiles.name,
-        clubId: request.club_id,
-        joinedAt: request.joined_at,
-        status: request.status as "PENDING" | "APPROVED" | "REJECTED",
+      // Filter and format pending membership requests
+      const pendingData = data.filter(
+        (member) => member.status === "PENDING"
+      );
+
+      const formattedRequests = pendingData.map((member) => ({
+        id: member.id,
+        profile: member.profile,
+        club: member.clubDto,
+        status: member.status as "PENDING" | "APPROVED" | "REJECTED",
+        joinedAt: member.joinedDate,
       }));
 
       setPendingRequests(formattedRequests);
+      console.log("Pending Requests",formattedRequests);
 
-      // Fetch approved members
-      // Mockup data for approved members
-      const membersData = [
-        {
-          user_id: "user3",
-          club_id: selectedClub.id,
-          status: "APPROVED",
-          joined_at: new Date().toISOString(),
-          profiles: {
-            name: "Alice Johnson",
-            email: "alice.johnson@example.com",
-          },
-        },
-        {
-          user_id: "user4",
-          club_id: selectedClub.id,
-          status: "APPROVED",
-          joined_at: new Date().toISOString(),
-          profiles: {
-            name: "Bob Brown",
-            email: "bob.brown@example.com",
-          },
-        },
-      ];
+      // Filter and format approved members
+      const membersData = data.filter(
+        (member) => member.status === "APPROVED"
+      );
 
-      // Format members
       const formattedMembers = membersData.map((member) => ({
-        userId: member.user_id,
-        userName: member.profiles.name,
-        clubId: member.club_id,
-        joinedAt: member.joined_at,
+        id: member.id,
+        profile: member.profile,
+        club: member.clubDto,
         status: member.status as "PENDING" | "APPROVED" | "REJECTED",
+        joinedAt: member.joinedDate,
       }));
 
       setClubMembers(formattedMembers);
+      console.log("Club Members", formattedMembers);
 
       // Set editing form values
       setEditName(selectedClub.name);
@@ -225,27 +185,25 @@ const ManageClubsPage: React.FC = () => {
     }
   };
 
-  const handleApproveRequest = async (userId: string, clubId: string) => {
+  const handleApproveRequest = async (userId: number, clubId: string) => {
     try {
       setProcessingRequest(userId);
 
-      // Mockup data for approving a request
-      const mockupData = pendingRequests.find(
-        (req) => req.userId === userId && req.clubId === clubId
-      );
-      if (!mockupData) {
-        throw new Error("Request not found");
-      }
 
-      // Simulate approval by updating the status
-      mockupData.status = "APPROVED";
+      const response = await clubService.approve(clubId, userId);
+      console.log(response);
+      if (!response) {
+        throw new Error("Error approving request");
+      }  
+
+    
 
       // Update UI
-      setPendingRequests((prev) => prev.filter((req) => req.userId !== userId));
+      setPendingRequests((prev) => prev.filter((req) => req.profile.id !== userId));
 
       // Add to members list
       const approvedMember = pendingRequests.find(
-        (req) => req.userId === userId
+        (req) => req.profile.id === userId
       );
       if (approvedMember) {
         setClubMembers((prev) => [
@@ -270,23 +228,19 @@ const ManageClubsPage: React.FC = () => {
     }
   };
 
-  const handleRejectRequest = async (userId: string, clubId: string) => {
+  const handleRejectRequest = async (userId: number, clubId: string) => {
     try {
       setProcessingRequest(userId);
 
-      // Mockup data for rejecting a request
-      const mockupData = pendingRequests.find(
-        (req) => req.userId === userId && req.clubId === clubId
-      );
-      if (!mockupData) {
-        throw new Error("Request not found");
+
+      const response = await clubService.reject(clubId, userId);
+      console.log(response);
+      if (!response) {
+        throw new Error("Error rejecting request");
       }
 
-      // Simulate rejection by updating the status
-      mockupData.status = "REJECTED";
-
       // Update UI
-      setPendingRequests((prev) => prev.filter((req) => req.userId !== userId));
+      setPendingRequests((prev) => prev.filter((req) => req.profile.id !== userId));
 
       toast({
         title: "Request rejected",
@@ -304,26 +258,24 @@ const ManageClubsPage: React.FC = () => {
     }
   };
 
-  const handleRemoveMember = async (userId: string, clubId: string) => {
+  const handleRemoveMember = async (userId: number, clubId: string) => {
     try {
       setProcessingRequest(userId);
 
-      // Mockup data for removing a member
-      const mockupData = clubMembers.find(
-        (member) => member.userId === userId && member.clubId === clubId
-      );
-      if (!mockupData) {
-        throw new Error("Member not found");
+      const response = await clubService.remove(clubId, userId);
+      console.log(response);
+      if(!response){
+        throw new Error("Error removing member");
       }
 
       // Simulate removal by filtering out the member
       const updatedMembers = clubMembers.filter(
-        (member) => member.userId !== userId
+        (member) => member.profile.id !== userId
       );
       setClubMembers(updatedMembers);
       // Update UI
       setClubMembers((prev) =>
-        prev.filter((member) => member.userId !== userId)
+        prev.filter((member) => member.profile.id !== userId)
       );
 
       toast({
@@ -504,18 +456,21 @@ const ManageClubsPage: React.FC = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {pendingRequests.map((request) => (
+                            {pendingRequests.map((pending) => (
                               <TableRow
-                                key={`${request.userId}-${request.clubId}`}
+                                key={`${pending.profile .id}-${pending.club.id}`}
                               >
                                 <TableCell className="font-medium">
-                                  {request.userName}
+                                  {pending.profile.name}
                                 </TableCell>
                                 <TableCell>
-                                  {format(
-                                    new Date(request.joinedAt),
+                                  {pending.status === "PENDING" &&
+                                  format(
+                                    new Date(pending.joinedAt),
                                     "MMM d, yyyy"
-                                  )}
+                                  )
+                                  }
+                            
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-2">
@@ -525,12 +480,12 @@ const ManageClubsPage: React.FC = () => {
                                       className="border-green-500 text-green-600 hover:bg-green-50"
                                       onClick={() =>
                                         handleApproveRequest(
-                                          request.userId,
-                                          request.clubId
+                                          pending.profile.id,
+                                          pending.club.id
                                         )
                                       }
                                       disabled={
-                                        processingRequest === request.userId
+                                        processingRequest === pending.profile.id
                                       }
                                     >
                                       <Check size={16} />
@@ -541,12 +496,12 @@ const ManageClubsPage: React.FC = () => {
                                       className="border-red-500 text-red-600 hover:bg-red-50"
                                       onClick={() =>
                                         handleRejectRequest(
-                                          request.userId,
-                                          request.clubId
+                                          pending.profile.id,
+                                          pending.club.id
                                         )
                                       }
                                       disabled={
-                                        processingRequest === request.userId
+                                        processingRequest === pending.profile.id
                                       }
                                     >
                                       <X size={16} />
@@ -583,10 +538,10 @@ const ManageClubsPage: React.FC = () => {
                           <TableBody>
                             {clubMembers.map((member) => (
                               <TableRow
-                                key={`${member.userId}-${member.clubId}`}
+                                key={`${member.profile.id}-${member.club.id}`}
                               >
                                 <TableCell className="font-medium">
-                                  {member.userName}
+                                  {member.profile.name}
                                 </TableCell>
                                 <TableCell>
                                   {format(
@@ -601,12 +556,12 @@ const ManageClubsPage: React.FC = () => {
                                     className="border-red-500 text-red-600 hover:bg-red-50"
                                     onClick={() =>
                                       handleRemoveMember(
-                                        member.userId,
-                                        member.clubId
+                                        member.profile.id,
+                                        member.club.id
                                       )
                                     }
                                     disabled={
-                                      processingRequest === member.userId
+                                      processingRequest === member.profile.id
                                     }
                                   >
                                     Remove
