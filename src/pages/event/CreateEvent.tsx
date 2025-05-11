@@ -1,114 +1,77 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../../components/ui/use-toast";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/components/ui/use-toast.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Label } from "@/components/ui/label.tsx";
+import { Textarea } from "@/components/ui/textarea.tsx";
+import { useAuth } from "@/hooks/useAuth.ts";
 import { Club } from "@/types";
-import { Calendar } from "../../components/ui/calender";
+import { Calendar } from "@/components/ui/calender.tsx";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils.ts";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../../components/ui/popover";
-
+} from "@/components/ui/popover.tsx";
+import clubService from "@/services/clubService.ts";
+import { eventService } from "@/services/eventService.ts";
 
 const CreateEvent: React.FC = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("12:00");
-  const [registrationLimit, setRegistrationLimit] = useState(30);
+  const [maxParticipants, setMaxParticipants] = useState(30);
   const [clubId, setClubId] = useState("");
-//   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
-// //   const [imageFile, setImageFile] = useState<File | null>(null);
-  
+
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(false);
-//   const [uploading, setUploading] = useState(false);
+  //   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    fetchUserClubs();
+    fetchClubs();
   }, [user]);
 
-  const fetchUserClubs = async () => {
-    if (!user) return;
-    
+  const fetchClubs = async () => {
+    //done
+    if (!profile) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      
-      
-      if (profile?.user.role === 'ADMIN' || profile?.user.role === "LEAD") {
-        // Admin can see all clubs
-        
-      } else {
-        // Club leader can only see their own clubs
-        
+      setLoading(true);
+
+      const data = await clubService.getAllClubs();
+
+      if (!data) {
+        console.error("Error fetching clubs: Eoor Fetching Clubs");
+        throw new Error("Error fetching clubs: Eoor Fetching Clubs");
       }
-      
-      // Dummy data for clubs
-      const dummyClubs = [
-          {
-              id: "1",
-              name: "Tech Club",
-              description: "A club for tech enthusiasts",
-              category: "Technology",
-              logo: "https://via.placeholder.com/150",
-              createdAt: new Date().toISOString(),
-              leaderId: "123",
-              memberCount: 10,
-            },
-            {
-                id: "2",
-                name: "Art Club",
-                description: "A club for art lovers",
-                category: "Art",
-                logo: "https://via.placeholder.com/150",
-                createdAt: new Date().toISOString(),
-                leaderId: "124",
-                memberCount: 15,
-            },
-        ];
-        
-        // Use dummy data instead of fetching from the database
-        setClubs(dummyClubs);
-        
-        // Set default club if there's only one
-        if (dummyClubs.length === 1) {
-            setClubId(dummyClubs[0].id);
-        }  
-        //   if (error) throw error;
-        const  data  = dummyClubs;
-      
-      if (data && data.length > 0) {
-        setClubs(data.map(club => ({
+
+      const formattedClubs = data.map((club) => {
+        return {
           id: club.id,
           name: club.name,
           description: club.description,
           category: club.category,
-          logo: club.logo,
           createdAt: club.createdAt,
-          leaderId: club.leaderId,
-          memberCount: 0 // Default value, not needed here
-        })));
-        
-        // Set default club if there's only one
-        if (data.length === 1) {
-          setClubId(data[0].id);
-        }
-      }
-      
+          lead: club.lead,
+        };
+      });
+      formattedClubs.sort((a, b) => a.name.localeCompare(b.name));
+
+      setClubs(formattedClubs);
+
     } catch (error) {
       console.error("Error fetching clubs:", error);
       toast({
@@ -116,30 +79,32 @@ const CreateEvent: React.FC = () => {
         title: "Error",
         description: "Failed to load your clubs. Please try again later.",
       });
+    } finally {
+      setLoading(false);
     }
   };
-  
-//   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (e.target.files && e.target.files[0]) {
-//       const file = e.target.files[0];
-      
-//       if (file.size > 5 * 1024 * 1024) { // 5MB limit
-//         toast({
-//           variant: "destructive",
-//           title: "File too large",
-//           description: "Please select an image smaller than 5MB.",
-//         });
-//         return;
-//       }
-      
-//       setImageFile(file);
-//       setImageUrl(URL.createObjectURL(file));
-//     }
-//   };
-  
+
+  //   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //     if (e.target.files && e.target.files[0]) {
+  //       const file = e.target.files[0];
+
+  //       if (file.size > 5 * 1024 * 1024) { // 5MB limit
+  //         toast({
+  //           variant: "destructive",
+  //           title: "File too large",
+  //           description: "Please select an image smaller than 5MB.",
+  //         });
+  //         return;
+  //       }
+
+  //       setImageFile(file);
+  //       setImageUrl(URL.createObjectURL(file));
+  //     }
+  //   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!date) {
       toast({
         variant: "destructive",
@@ -148,7 +113,7 @@ const CreateEvent: React.FC = () => {
       });
       return;
     }
-    
+
     if (!clubId) {
       toast({
         variant: "destructive",
@@ -157,42 +122,56 @@ const CreateEvent: React.FC = () => {
       });
       return;
     }
-    
+
     try {
       setLoading(true);
+
+      // Combine date and time with UTC adjustment
+      const [hours, minutes] = time.split(":").map(Number);
       
-      // Combine date and time
-      const [hours, minutes] = time.split(':').map(Number);
       const eventDateTime = new Date(date);
-      eventDateTime.setHours(hours, minutes);
+      eventDateTime.setUTCHours(hours, minutes, 0, 0); // Set time explicitly in UTC
       
-    
-      
+
+
+      const response = await eventService.createEvent({
+        title,
+        description,
+        location,
+        dateTime: eventDateTime.toISOString(),
+        clubId,
+        maxParticipants,
+      });
+
+      if (!response) {
+        console.error("Error creating event: Eoor Creating Event");
+        throw new Error("Error creating event: Eoor Creating Event");
+      }
+
       // Create event
-    //   const { data: eventData, error: eventError } = await supabase
-    //     .from('events')
-    //     .insert({
-    //       title,
-    //       description,
-    //       location,
-    //       date: eventDateTime.toISOString(),
-    //       club_id: clubId,
-    //       registration_limit: registrationLimit,
-    //       image: eventImageUrl
-    //     })
-    //     .select('id')
-    //     .single();
-      
-    //   if (eventError) throw eventError;
-      
+      //   const { data: eventData, error: eventError } = await supabase
+      //     .from('events')
+      //     .insert({
+      //       title,
+      //       description,
+      //       location,
+      //       date: eventDateTime.toISOString(),
+      //       club_id: clubId,
+      //       registration_limit: maxParticipants,
+      //       image: eventImageUrl
+      //     })
+      //     .select('id')
+      //     .single();
+
+      //   if (eventError) throw eventError;
+
       toast({
         title: "Event created",
         description: "Your event has been created successfully.",
       });
-      
+
       // Navigate to event page
-      navigate(`/events/${3}`);
-      
+      navigate(`/events/${response.id}`);
     } catch (error) {
       console.error("Error creating event:", error);
       toast({
@@ -206,7 +185,10 @@ const CreateEvent: React.FC = () => {
   };
 
   // Check if user can create events
-  if (!user || (profile?.user.role !== 'LEAD' && profile?.user.role !== 'ADMIN')) {
+  if (
+    !user ||
+    (profile?.user.role !== "LEAD" && profile?.user.role !== "ADMIN")
+  ) {
     return (
       <div className="container py-10 text-center">
         <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
@@ -218,8 +200,10 @@ const CreateEvent: React.FC = () => {
 
   return (
     <div className="container py-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Create New Event</h1>
-      
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">
+        Create New Event
+      </h1>
+
       <Card>
         <CardHeader>
           <CardTitle>Event Details</CardTitle>
@@ -237,7 +221,7 @@ const CreateEvent: React.FC = () => {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="club">Club</Label>
                 <select
@@ -249,11 +233,13 @@ const CreateEvent: React.FC = () => {
                 >
                   <option value="">Select a club</option>
                   {clubs.map((club) => (
-                    <option key={club.id} value={club.id}>{club.name}</option>
+                    <option key={club.id} value={club.id}>
+                      {club.name}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="date">Date</Label>
                 <Popover>
@@ -280,7 +266,7 @@ const CreateEvent: React.FC = () => {
                   </PopoverContent>
                 </Popover>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="time">Time</Label>
                 <Input
@@ -291,7 +277,7 @@ const CreateEvent: React.FC = () => {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
                 <Input
@@ -302,19 +288,21 @@ const CreateEvent: React.FC = () => {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="registration-limit">Registration Limit</Label>
                 <Input
                   id="registration-limit"
                   type="number"
                   min="1"
-                  value={registrationLimit}
-                  onChange={(e) => setRegistrationLimit(parseInt(e.target.value))}
+                  value={maxParticipants}
+                  onChange={(e) =>
+                    setMaxParticipants(parseInt(e.target.value))
+                  }
                   required
                 />
               </div>
-              
+
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -326,7 +314,7 @@ const CreateEvent: React.FC = () => {
                   required
                 />
               </div>
-              
+
               {/* <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="image">Event Image (Optional)</Label>
                 <Input
@@ -348,19 +336,19 @@ const CreateEvent: React.FC = () => {
                 </div>
               )} */}
             </div>
-            
+
             <div className="flex justify-end space-x-3">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="bg-border text-white border-border"
+              <Button
+                type="button"
+                variant="outline"
+                className="bg-border text-white border-border hover:bg-border/60"
                 onClick={() => navigate(-1)}
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                className="bg-secondary hover:bg-ccem-purple/90"
+              <Button
+                type="submit"
+                className="bg-secondary hover:secondary/90"
                 disabled={loading}
               >
                 {loading ? "Creating..." : "Create Event"}

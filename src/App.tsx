@@ -16,14 +16,14 @@ import LeaderDashboard from "./pages/leader/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
 import ManageUsersPage from "./pages/admin/ManageUsers";
 import ProfilePage from "./pages/profile/Profile";
-import CreateEvent from "./pages/leader/CreateEvent";
 import ClubsPage from "./pages/clubs/ClubsPage";
 import ClubDetail from "./pages/clubs/ClubDetail";
-import EventsPage from "./event/EventPage";
-import EventDetail from "./event/EventDetail";
+import EventsPage from "@/pages/event/EventPage";
+import EventDetail from "@/pages/event/EventDetail";
 import AnnouncementsPage from "./pages/announcement/AnnouncementPage";
 import ManageClubsPage from "./pages/clubs/ManageClubs";
 import LoadingSpinner from "./components/layout/Spinner";
+import CreateEvent from "@/pages/event/CreateEvent";
 
 const queryClient = new QueryClient();
 

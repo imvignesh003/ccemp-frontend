@@ -14,8 +14,10 @@ export interface MemberData {
     role: UserRole;
   };
   club : Club;
+  clubDto ?: Club;
+  joinedDate ?: Date;
   status : 'PENDING' | 'APPROVED' | 'REJECTED' | 'NONE';
-  joinedAt : Date;
+  joinedAt : Date | undefined;
 }
 
 const clubService = {
@@ -63,6 +65,10 @@ const clubService = {
 
   remove : async (clubId: string, userId: number): Promise<boolean> => {
     const response = await api.post(`/clubs/${clubId}/remove`, { userId });
+    return response.data;
+  },
+  getMemberStatus: async (clubId: string, userId: number): Promise<MemberData> => {
+    const response = await api.get(`/clubs/${clubId}/status/${userId}`);
     return response.data;
   },
 

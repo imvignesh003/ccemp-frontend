@@ -1,7 +1,7 @@
 import { Profile } from "@/services/adminService";
 
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 export type UserRole = 'STUDENT' | 'LEAD' | 'ADMIN';
 
 export interface User {
@@ -17,27 +17,24 @@ export interface Club {
   description: string;
   category: string;
   createdAt: string;
-  memberCount: number;
   lead : Profile;
+  memberCount?: number;
 }
+
 
 export interface ExtendedClub extends Club {
   status?: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
-export interface Event {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  location: string;
-  clubId: string;
-  clubName: string;
-  registrationLimit: number;
-  registeredCount: number;
-  image?: string;
-  isRegistered?: boolean;
-}
+// export interface Event {
+//   id: string;
+//   title: string;
+//   description: string;
+//   dateTime: string;
+//   location: string;
+//   club : Club;
+//   registrationLimit: number;
+// }
 
 export interface Announcement {
   id: string;

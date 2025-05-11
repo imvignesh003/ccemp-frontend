@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useToast } from "../../components/ui/use-toast";
-import { Button } from "../../components/ui/button";
+import { useToast } from "@/hooks/use-toast.tsx";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../components/ui/card";
+} from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { Club } from "@/types";
 import {
@@ -17,12 +17,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../components/ui/table";
+} from "@/components/ui/table";
 import { Check, X, Edit, Plus } from "lucide-react";
 import { format } from "date-fns";
 import CreateClub from "@/components/club/CreateClub";
 import clubService, { MemberData } from "@/services/clubService";
 import EditClub from "@/components/club/EditClub";
+import LoadingSpinner from "@/components/layout/Spinner.tsx";
 
 const ManageClubsPage: React.FC = () => {
   const { user, profile } = useAuth();
@@ -58,8 +59,7 @@ const ManageClubsPage: React.FC = () => {
     }
   }, [selectedClub]);
 
-  const fetchClubs = async () => { //done 
-    //done
+  const fetchClubs = async () => { //done
     if (!user || !profile) {
       setLoading(false);
       return;
@@ -145,7 +145,7 @@ const ManageClubsPage: React.FC = () => {
       const formattedRequests = pendingData.map((member) => ({
         id: member.id,
         profile: member.profile,
-        club: member.clubDto,
+        club: member.clubDto || member.club,
         status: member.status as "PENDING" | "APPROVED" | "REJECTED",
         joinedAt: member.joinedDate,
       }));
@@ -161,7 +161,7 @@ const ManageClubsPage: React.FC = () => {
       const formattedMembers = membersData.map((member) => ({
         id: member.id,
         profile: member.profile,
-        club: member.clubDto,
+        club: member.clubDto || member.club,
         status: member.status as "PENDING" | "APPROVED" | "REJECTED",
         joinedAt: member.joinedDate,
       }));
@@ -319,6 +319,12 @@ const ManageClubsPage: React.FC = () => {
     );
   }
 
+  if (loading) {
+    return (
+        <LoadingSpinner />
+    );
+  }
+
   return (
     <div className="container py-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -345,7 +351,7 @@ const ManageClubsPage: React.FC = () => {
         />
       )}
 
-      {clubs.length === 0 && !isCreating ? (
+      {clubs.length === 0 && !loading && !isCreating ? (
         <Card>
           <CardContent className="py-10 text-center">
             <p className="text-gray-500 mb-4">
@@ -464,7 +470,7 @@ const ManageClubsPage: React.FC = () => {
                                   {pending.profile.name}
                                 </TableCell>
                                 <TableCell>
-                                  {pending.status === "PENDING" &&
+                                  {pending.status === "PENDING" && pending.joinedAt &&
                                   format(
                                     new Date(pending.joinedAt),
                                     "MMM d, yyyy"
@@ -544,7 +550,7 @@ const ManageClubsPage: React.FC = () => {
                                   {member.profile.name}
                                 </TableCell>
                                 <TableCell>
-                                  {format(
+                                  {member.joinedAt && format(
                                     new Date(member.joinedAt),
                                     "MMM d, yyyy"
                                   )}

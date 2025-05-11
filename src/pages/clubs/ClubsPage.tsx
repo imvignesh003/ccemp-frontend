@@ -146,7 +146,7 @@ const ClubsPage: React.FC = () => {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="h-64 bg-gray-100 rounded-lg animate-pulse"
+              className="h-64 bg-border rounded-lg animate-pulse"
             ></div>
           ))}
         </div>

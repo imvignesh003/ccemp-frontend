@@ -34,7 +34,7 @@ export type LoginResponse = {
 }
 
   
-  export type Club = {
+export type Club = {
     id: string;
     name: string;
     description: string;  
@@ -43,7 +43,7 @@ export type LoginResponse = {
     leader_id: string;
     created_at?: string;
     updated_at?: string;
-  };
+};
   
   export type ClubMember = {
     id: string;
@@ -57,13 +57,11 @@ export type LoginResponse = {
     id: string;
     title: string;
     description: string;
-    date: string;
+    dateTime: string;
     location: string;
-    club_id: string;
-    registration_limit: number;
-    image?: string;
-    created_at?: string;
-    updated_at?: string;
+    clubId: string;
+    maxParticipants: number;
+    createdAt?: string;
   };
   
   export type EventRegistration = {

@@ -1,31 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { useToast } from "../../components/ui/use-toast";
-import { Button } from "../../components/ui/button";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, User, Users } from "lucide-react";
-import { Club, Event, ClubMember, Announcement } from "@/types";
+import { Club, ClubMember, Announcement } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
-import EventCard from "../../components/shared/EventCard";
-import AnnouncementCard from "../../components/shared/AnnouncementCard";
-import { format } from "date-fns";
+import EventCard from "@/components/shared/EventCard";
+import AnnouncementCard from "@/components/shared/AnnouncementCard";
+import { format, parseISO } from "date-fns";
 import adminService from "@/services/adminService";
-import clubService from "@/services/clubService";
-
-interface ExtendedEvent extends Event {
-  isRegistered?: boolean;
-}
+import clubService, { MemberData } from "@/services/clubService";
+import { RegisteredEvents } from "@/pages/event/EventPage";
+import { eventService } from "@/services/eventService.ts";
 
 const ClubDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,9 +21,9 @@ const ClubDetail: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   // const [club, setClub] = useState<Club | null>(null);
-  const [events, setEvents] = useState<ExtendedEvent[]>([]);
+  const [events, setEvents] = useState<RegisteredEvents[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [members, setMembers] = useState<ClubMember[]>([]);
+  const [members, setMembers] = useState<MemberData[]>([]);
   const [leader, setLeader] = useState<{ name: string; email: string } | null>(
     null
   );
@@ -117,160 +105,99 @@ const ClubDetail: React.FC = () => {
     try {
       setLoading(true);
 
-      // Fetch club events with a simpler query to avoid parsing error
-      // Mockup data for events
-      const eventsData = [
-        {
-          id: "1",
-          title: "Tech Talk",
-          description: "A talk on the latest in technology.",
-          date: new Date().toISOString(),
-          location: "Auditorium",
-          club_id: id,
-          registration_limit: 100,
-        },
-        {
-          id: "2",
-          title: "Coding Workshop",
-          description: "Hands-on coding workshop for beginners.",
-          date: new Date(
-            new Date().setDate(new Date().getDate() + 7)
-          ).toISOString(),
-          location: "Lab 1",
-          club_id: id,
-          registration_limit: 50,
-        },
-      ];
+      // Fetch all events
+      const response = await eventService.getClubEvents(id);
 
-      // Get registration counts in a separate query
-      const registrationCounts = await Promise.all(
-        eventsData.map(async (event) => {
-          // Mockup data for registration counts
-          const count = 16;
+      if (!response) {
+        console.error("Error fetching events: Error Fetching Events");
+        throw new Error("Error fetching events");
+      }
+
+      // Get registration counts for each event
+      const registrationCountsPromises = response.map(async (event) => {
+        try {
+          const count = await eventService.getRegistrationCount(event.id);
           return {
             eventId: event.id,
             count: count || 0,
           };
-        })
-      );
+        } catch (error) {
+          console.error(
+            `Error fetching registration count for event ${event.id}:`,
+            error
+          );
+          return {
+            eventId: event.id,
+            count: 0,
+          };
+        }
+      });
 
-      // Format events
-      const formattedEvents = eventsData.map((event) => {
+      const registrationCounts = await Promise.all(registrationCountsPromises);
+
+      // Format events data
+      const formattedEvents = response.map((event) => {
         const countObj = registrationCounts.find((c) => c.eventId === event.id);
         return {
           id: event.id,
           title: event.title,
           description: event.description,
-          date: event.date,
+          dateTime: event.dateTime,
           location: event.location,
-          clubId: event.club_id,
-          clubName: club.name,
-          registrationLimit: event.registration_limit,
+          club: event.club,
+          maxParticipants: event.maxParticipants,
           registeredCount: countObj ? countObj.count : 0,
+          isRegistered: false,
         };
       });
 
-      if (user.role === "LEAD" || user.role === "ADMIN") {
-        setIsLeader(true);
-      } else {
-        setIsLeader(false);
-      }
       setEvents(formattedEvents);
 
-      // Fetch club announcements
-      // Mockup data for announcements
-      const announcementsData = [
-        {
-          id: "1",
-          title: "Welcome to the Club!",
-          content:
-            "We are excited to have you join us. Stay tuned for upcoming events.",
-          club_id: id,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          title: "Monthly Meeting",
-          content:
-            "Join us for our monthly meeting to discuss club activities and plans.",
-          club_id: id,
-          created_at: new Date(
-            new Date().setDate(new Date().getDate() - 7)
-          ).toISOString(),
-        },
-      ];
+      // Fetch club announcements from the backend
+      // const announcementsData = await clubService.getClubAnnouncements(id);
+      //
+      // // Format announcements
+      // const formattedAnnouncements = announcementsData.map((announcement) => ({
+      //   id: announcement.id,
+      //   title: announcement.title,
+      //   content: announcement.content,
+      //   clubId: announcement.club_id,
+      //   clubName: club.name,
+      //   date: announcement.created_at,
+      // }));
 
-      // Format announcements
-      const formattedAnnouncements = announcementsData.map((announcement) => ({
-        id: announcement.id,
-        title: announcement.title,
-        content: announcement.content,
-        clubId: announcement.club_id,
-        clubName: club.name,
-        date: announcement.created_at,
-      }));
+      // setAnnouncements(formattedAnnouncements);
 
-      setAnnouncements(formattedAnnouncements);
+      // Fetch club members from the backend
+      const membersData = await clubService.getClubMemberDetails(id);
 
-      // Fetch club members
-      // Mockup data for members
-      const membersData = [
-        {
-          user_id: "1",
-          status: "APPROVED",
-          joined_at: new Date(
-            new Date().setDate(new Date().getDate() - 30)
-          ).toISOString(),
-          profiles: {
-            name: "John Doe",
-            email: "john.doe@example.com",
-            profile_image: "profile1.jpg",
-          },
-        },
-        {
-          user_id: "2",
-          status: "APPROVED",
-          joined_at: new Date(
-            new Date().setDate(new Date().getDate() - 15)
-          ).toISOString(),
-          profiles: {
-            name: "Jane Smith",
-            email: "jane.smith@example.com",
-            profile_image: "profile2.jpg",
-          },
-        },
-      ];
+      for(const member of membersData){
+        console.log("member"+member.club);
+      }
 
       // Format members
-      const formattedMembers = membersData.map((member) => ({
-        userId: member.user_id,
-        userName: member.profiles.name,
-        clubId: id,
-        joinedAt: member.joined_at,
-        status: member.status as "APPROVED" | "PENDING" | "REJECTED",
-      }));
+      const formattedMembers = membersData
+        .filter((member) => member.clubDto !== undefined)
+        .map((member) => ({
+          id: member.id,
+          club: member.clubDto as Club,
+          profile: member.profile,
+          joinedAt: member.joinedDate,
+          status: member.status as "APPROVED" | "PENDING" | "REJECTED",
+        }));
 
       setMembers(formattedMembers);
 
-      // Update club member count
-      // setClub(prev => prev ? { ...prev, memberCount: formattedMembers.length } : null);
-
       // Check if user is a member of this club
       if (user) {
-        // Mockup data for member status
-        const memberData = {
-          status: "APPROVED", // Change this to "PENDING" or "NONE" for different scenarios
-        };
-
+        const memberData = await clubService.getMemberStatus(id, user.id);
         setMemberStatus(memberData.status as "APPROVED" | "PENDING");
-
         // Check if user is registered for any events
-        // Mockup data for event registrations
-        const registrationsData = [
-          { event_id: "1" }, // User is registered for event with ID "1"
-        ];
-
-        const registeredEventIds = registrationsData.map((reg) => reg.event_id);
+        const registrationsData = await eventService.getUserRegistrations(
+          user.id
+        );
+        console.log("registrationsData", registrationsData);
+        const registeredEventIds = registrationsData
 
         // Update events with registration status
         setEvents((prev) =>
@@ -412,10 +339,12 @@ const ClubDetail: React.FC = () => {
   }
 
   const futureEvents = events.filter(
-    (event) => new Date(event.date) >= new Date()
+    (event) =>
+      new Date(format(parseISO(event.dateTime), "yyyy-MM-dd")) >= new Date()
   );
   const pastEvents = events.filter(
-    (event) => new Date(event.date) < new Date()
+    (event) =>
+      new Date(format(parseISO(event.dateTime), "yyyy-MM-dd")) < new Date()
   );
 
   return (
@@ -614,15 +543,15 @@ const ClubDetail: React.FC = () => {
         <TabsContent value="members" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {members.map((member) => (
-              <Card key={member.userId} className="overflow-hidden">
+              <Card key={member.profile.id} className="overflow-hidden">
                 <div className="p-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-ccem-purple text-white flex items-center justify-center">
-                    {member.userName.charAt(0)}
+                    {member.profile.name.charAt(0)}
                   </div>
                   <div>
-                    <p className="font-medium">{member.userName}</p>
+                    <p className="font-medium">{member.profile.name}</p>
                     <p className="text-sm text-gray-500">
-                      Joined {format(new Date(member.joinedAt), "MMM yyyy")}
+                      Joined {member?.joinedAt ? format(member.joinedAt, "MMM yyyy") : "Unknown"}
                     </p>
                   </div>
                 </div>
@@ -636,7 +565,7 @@ const ClubDetail: React.FC = () => {
               {memberStatus === "NONE" && (
                 <Button
                   onClick={handleJoinClub}
-                  className="mt-2 bg-ccem-purple hover:bg-ccem-purple/90"
+                  className="mt-2 bg-secondary hover:bg-secondary/60"
                 >
                   Be the First to Join
                 </Button>
