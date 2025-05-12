@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
@@ -11,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { UserRole } from "../../types";
 
 interface AnnouncementFormFieldsProps {
   title: string;
@@ -21,9 +19,6 @@ interface AnnouncementFormFieldsProps {
   clubId: string;
   setClubId: (value: string) => void;
   clubs: { id: string; name: string }[];
-  targetRole: UserRole | "ALL";
-  setTargetRole: (value: UserRole | "ALL") => void;
-  isAdmin: boolean;
   isSubmitting: boolean;
   onCancel: () => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -37,9 +32,6 @@ const AnnouncementFormFields: React.FC<AnnouncementFormFieldsProps> = ({
   clubId,
   setClubId,
   clubs,
-  targetRole,
-  setTargetRole,
-  isAdmin,
   isSubmitting,
   onCancel,
   onSubmit,
@@ -47,77 +39,63 @@ const AnnouncementFormFields: React.FC<AnnouncementFormFieldsProps> = ({
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="club" className="text-raisin_black dark:text-almond-200">Club</Label>
+        <Label htmlFor="club" className="text-border">
+          Club
+        </Label>
         <Select value={clubId} onValueChange={setClubId}>
-          <SelectTrigger className="border-burnt_sienna-300 dark:border-caput_mortuum-500 focus:ring-burnt_sienna-400 dark:focus:ring-burnt_sienna-600">
-            <SelectValue placeholder="Select a club" />
+          <SelectTrigger className="border-border focus:ring-border text-border">
+            <SelectValue placeholder="Select a club"/>
           </SelectTrigger>
-          <SelectContent className="bg-almond-100 dark:bg-raisin_black-400 border-burnt_sienna-300 dark:border-caput_mortuum-500">
+          <SelectContent className="bg-secondary border-border text-border">
             {clubs.map((club) => (
-              <SelectItem key={club.id} value={club.id}>
+              <SelectItem key={club.id} value={String(club.id)}>
                 {club.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
-      
-      {isAdmin && (
-        <div className="space-y-2">
-          <Label htmlFor="target" className="text-raisin_black dark:text-almond-200">Target Audience</Label>
-          <Select value={targetRole} onValueChange={(value) => setTargetRole(value as UserRole | "ALL")}>
-            <SelectTrigger className="border-burnt_sienna-300 dark:border-caput_mortuum-500 focus:ring-burnt_sienna-400 dark:focus:ring-burnt_sienna-600">
-              <SelectValue placeholder="Select target audience" />
-            </SelectTrigger>
-            <SelectContent className="bg-almond-100 dark:bg-raisin_black-400 border-burnt_sienna-300 dark:border-caput_mortuum-500">
-              <SelectItem value="ALL">Everyone</SelectItem>
-              <SelectItem value="STUDENT">Students Only</SelectItem>
-              <SelectItem value="CLUB_LEADER">Club Leaders Only</SelectItem>
-              <SelectItem value="ADMIN">Admins Only</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-caput_mortuum-600 dark:text-burnt_sienna-400">
-            As an admin, you can target announcements to specific roles.
-          </p>
-        </div>
-      )}
-      
+
       <div className="space-y-2">
-        <Label htmlFor="title" className="text-raisin_black dark:text-almond-200">Title</Label>
+        <Label htmlFor="title" className="text-border">
+          Title
+        </Label>
         <Input
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter announcement title"
-          className="border-burnt_sienna-300 dark:border-caput_mortuum-500 focus-visible:ring-burnt_sienna-300 dark:focus-visible:ring-caput_mortuum-400"
+          className="border-border  focus-visible:ring-border"
           required
         />
       </div>
-      
+
       <div className="space-y-2">
-        <Label htmlFor="content" className="text-raisin_black dark:text-almond-200">Content</Label>
+        <Label htmlFor="content" className="text-border">
+          Content
+        </Label>
         <Textarea
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Write your announcement here..."
-          className="min-h-32 border-burnt_sienna-300 dark:border-caput_mortuum-500 focus-visible:ring-burnt_sienna-300 dark:focus-visible:ring-caput_mortuum-400"
+          className="min-h-32 border-border  focus-visible:ring-border"
           required
         />
       </div>
-      
+
       <div className="flex justify-end space-x-3 pt-4">
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
-          className="border-burnt_sienna text-burnt_sienna hover:bg-burnt_sienna/10 dark:border-burnt_sienna-400 dark:text-burnt_sienna-400"
+          className="border-border bg-border text-background hover:bg-border/60"
         >
           Cancel
         </Button>
         <Button
           type="submit"
-          className="bg-burnt_sienna hover:bg-burnt_sienna-600 text-almond"
+          className="bg-secondary hover:bg-secondary/60 text-border"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Publishing..." : "Publish Announcement"}

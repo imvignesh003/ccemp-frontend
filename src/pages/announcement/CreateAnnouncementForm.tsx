@@ -1,18 +1,13 @@
-
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "../../components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { useAuth } from "@/hooks/useAuth";
-import { useClubLeadership } from "../../hooks/useClubLeadership";
-import { canPostAnnouncement, UserRole } from "../../types";
 import { MessageSquarePlus } from "lucide-react";
-import { useClubsFetching } from "../../hooks/useClubsFetching";
+import { useClubsFetching } from "@/hooks/useClubFetching";
 import AnnouncementFormFields from "./AnnouncementFormFields";
-import UnauthorizedView from "./UnauthorizedView";
+import { announcementService } from "@/services/announcementService";
 
 const CreateAnnouncementForm: React.FC = () => {
-  const { user, profile } = useAuth();
   const [searchParams] = useSearchParams();
   const clubIdParam = searchParams.get("clubId");
   const navigate = useNavigate();
@@ -20,12 +15,9 @@ const CreateAnnouncementForm: React.FC = () => {
   
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [targetRole, setTargetRole] = useState<UserRole | "ALL">("ALL");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { clubs, clubId, setClubId } = useClubsFetching(clubIdParam);
-  const { isLeader } = useClubLeadership(user?.id, clubId);
-  const isAdmin = profile?.role === 'ADMIN';
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,32 +29,22 @@ const CreateAnnouncementForm: React.FC = () => {
         description: "Please fill in all required fields.",
       });
       return;
-    }
-    
-    // Verify permissions
-    if (profile && !canPostAnnouncement(profile.role, targetRole === "ALL" ? null : targetRole as UserRole)) {
-      toast({
-        variant: "destructive",
-        title: "Not authorized",
-        description: "You don't have permission to post this announcement.",
-      });
-      return;
-    }
-    
+    }    
     try {
       setIsSubmitting(true);
       
       // Create the announcement
-      const { error } = await supabase
-        .from('announcements')
-        .insert({
-          title,
-          content,
-          club_id: clubId,
-          target_role: targetRole === "ALL" ? null : targetRole
-        });
+
+      const response = await announcementService.createAnnouncement({
+        title,
+        content,
+        clubId: clubId,
+      });
+
+      if(!response.id){
+        throw new Error("Failed to create announcement");
+      }
       
-      if (error) throw error;
       
       toast({
         title: "Announcement created",
@@ -84,21 +66,18 @@ const CreateAnnouncementForm: React.FC = () => {
     }
   };
   
-  // Check if user can post announcements
-  if (profile && !canPostAnnouncement(profile.role)) {
-    return <UnauthorizedView />;
-  }
+
   
   return (
     <div className="container py-6 animate-fade-in">
       <div className="flex items-center gap-2 mb-6">
-        <MessageSquarePlus size={28} className="text-burnt_sienna dark:text-burnt_sienna-400" />
-        <h1 className="text-3xl font-bold text-raisin_black dark:text-almond">Create Announcement</h1>
+        <MessageSquarePlus size={28} className="text-border" />
+        <h1 className="text-3xl font-bold text-border">Create Announcement</h1>
       </div>
       
-      <Card className="border-almond-300 dark:border-caput_mortuum-600">
-        <CardHeader className="border-b border-almond-300 dark:border-caput_mortuum-600">
-          <CardTitle className="text-raisin_black dark:text-almond">Announcement Details</CardTitle>
+      <Card className="border-border text-border">
+        <CardHeader className="border-b border-border ">
+          <CardTitle className="text-border">Announcement Details</CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <AnnouncementFormFields
@@ -109,11 +88,8 @@ const CreateAnnouncementForm: React.FC = () => {
             clubId={clubId}
             setClubId={setClubId}
             clubs={clubs}
-            targetRole={targetRole}
-            setTargetRole={setTargetRole}
-            isAdmin={isAdmin}
             isSubmitting={isSubmitting}
-            onCancel={() => navigate("/announcements")}
+            onCancel={() => navigate(-1)}
             onSubmit={handleSubmit}
           />
         </CardContent>

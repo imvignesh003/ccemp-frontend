@@ -24,6 +24,7 @@ import AnnouncementsPage from "./pages/announcement/AnnouncementPage";
 import ManageClubsPage from "./pages/clubs/ManageClubs";
 import LoadingSpinner from "./components/layout/Spinner";
 import CreateEvent from "@/pages/event/CreateEvent";
+import CreateAnnouncementForm from "./pages/announcement/CreateAnnouncementForm";
 
 const queryClient = new QueryClient();
 
@@ -126,11 +127,11 @@ const AppRoutes = () => (
 
       {/* Announcement Routes */}
       <Route path="announcements" element={<AnnouncementsPage  />} />
-      {/* <Route path="create-announcement" element={
+      <Route path="create-announcement" element={
         <RoleProtectedRoute allowedRoles={['LEAD', 'ADMIN']}>
           <CreateAnnouncementForm />
         </RoleProtectedRoute>
-      } /> */}
+      } />
 
       {/* Profile Routes */}
       <Route path="profile" element={<ProfilePage />} />

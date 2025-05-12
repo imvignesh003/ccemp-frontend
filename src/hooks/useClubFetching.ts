@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "../components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import clubService from "../services/clubService";
+import clubService from "@/services/clubService";
 
 interface Club {
   id: string;
@@ -32,7 +32,7 @@ export const useClubsFetching = (clubIdParam: string | null) => {
         fetchedClubs = await clubService.getAllClubs();
       } else if (profile?.user.role === 'LEAD') {
         // Club leaders see their clubs
-        fetchedClubs = await clubService.getUserClubs();
+        fetchedClubs = await clubService.getMyClubs(profile.user.id);
       } else {
         // Students don't see any clubs (they can't create announcements)
         setClubs([]);

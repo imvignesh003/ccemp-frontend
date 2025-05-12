@@ -18,6 +18,7 @@ export interface Club {
   category: string;
   createdAt: string;
   lead : Profile;
+  leadId?: string;
   memberCount?: number;
 }
 
@@ -136,10 +137,3 @@ export const canAssignLeaders = (userRole: UserRole): boolean => {
   return userRole === 'ADMIN';
 };
 
-export const canJoinClub = (_userRole: UserRole): boolean => {
-  return true; // All users can join clubs
-};
-
-export const canRegisterForEvent = (_userRole: UserRole): boolean => {
-  return true; // All users can register for events
-};

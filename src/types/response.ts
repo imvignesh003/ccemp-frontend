@@ -76,8 +76,8 @@ export type Club = {
     id: string;
     title: string;
     content: string;
-    club_id: string;
-    created_at?: string;
-    updated_at?: string;
+    club: Club;
+    clubId?: string;
+    createdAt?: string;
   };
   

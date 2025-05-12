@@ -8,8 +8,8 @@ import {
   Settings,
   Users,
   PlusCircle,
-  BarChart3,
   Bell,
+  MessageSquarePlus,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -105,9 +105,9 @@ const Sidebar: React.FC = () => {
               />
               
               <SidebarItem
-                to="/analytics"
-                icon={<BarChart3 size={18} />}
-                label="Analytics"
+                to="/create-announcement"
+                icon={<MessageSquarePlus size={18} />}
+                label="Create Announcement"
                 active={location.pathname === "/analytics"}
               />
             </div>

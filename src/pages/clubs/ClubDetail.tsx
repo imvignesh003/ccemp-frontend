@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, User, Users } from "lucide-react";
-import { Club, ClubMember, Announcement } from "@/types";
+import { Club } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import EventCard from "@/components/shared/EventCard";
 import AnnouncementCard from "@/components/shared/AnnouncementCard";
@@ -14,13 +14,15 @@ import adminService from "@/services/adminService";
 import clubService, { MemberData } from "@/services/clubService";
 import { RegisteredEvents } from "@/pages/event/EventPage";
 import { eventService } from "@/services/eventService.ts";
+import { announcementService } from "@/services/announcementService";
+import { Announcement } from "@/types/response";
 
 const ClubDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const club: Club | null = useLocation().state?.club as Club;
+  // const club: Club | null = useLocation().state?.club as Club;
   const { user } = useAuth();
   const { toast } = useToast();
-  // const [club, setClub] = useState<Club | null>(null);
+  const [club, setClub] = useState<Club | null>(null);
   const [events, setEvents] = useState<RegisteredEvents[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [members, setMembers] = useState<MemberData[]>([]);
@@ -35,47 +37,70 @@ const ClubDetail: React.FC = () => {
   const [isLeader, setIsLeader] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      fetchEventDetails();
-    }
-  }, [id, user]);
+    const fetch = async () => {
+      if (id) {
+        try {
+          const clubData = await clubService.getClubById(String(id));
+          if (!clubData) {
+            throw new Error("Club not found");
+          }
+          setClub(clubData);
+
+          console.log("club334", clubData);
+
+          setIsLeader(
+            user?.role === "LEAD" || user?.role === "ADMIN" ? true : false
+          );
+          fetchEventDetails();
+        } catch (error) {
+          console.error("Error fetching member status:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description:
+              "Failed to load member status. Please try again later.",
+          });
+        }
+      }
+    };
+
+    fetch();
+  }, [id]);
 
   useEffect(() => {
-    if (club) {
-      fetchLeader(club.lead.id);
-      fetchMemberStatus(club.id, user?.id);
-      // setMemberStatus(club.memberStatus as 'APPROVED' | 'PENDING' | 'REJECTED' | 'NONE');
-    }
-  }, [club]);
-
-  const fetchMemberStatus = async (
-    clubId: string,
-    userId: string | undefined
-  ) => {
-    if (!userId) return;
-    try {
-      const response = await clubService.getClubMemberDetails(clubId);
-      if (response) {
-        const member = response.find(
-          (member) => member.profile.id === Number(userId)
-        );
-        setMemberStatus(
-          member
-            ? (member.status as "APPROVED" | "PENDING" | "REJECTED")
-            : "NONE"
-        );
-      } else {
-        throw new Error("Member status not found");
+    const fetchData = async () => {
+      if (club) {
+        try {
+          const response = id
+            ? await clubService.getClubMemberDetails(id)
+            : null;
+          if (response) {
+            const member = response.find(
+              (member) => member.profile.id === Number(user.id)
+            );
+            const status = member
+              ? (member.status as "APPROVED" | "PENDING" | "REJECTED" | "NONE")
+              : "NONE";
+            setMemberStatus(status);
+          } else {
+            throw new Error("Member status not found");
+          }
+          fetchLeader(club?.lead.id);
+        } catch (error) {
+          console.error("Error fetching member status:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description:
+              "Failed to load member status. Please try again later.",
+          });
+        }
       }
-    } catch (error) {
-      console.error("Error fetching member status:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load member status. Please try again later.",
-      });
-    }
-  };
+    };
+
+    fetchData();
+  }, [club, memberStatus]);
+
   const fetchLeader = async (leadId: string) => {
     //done
     try {
@@ -154,26 +179,23 @@ const ClubDetail: React.FC = () => {
       setEvents(formattedEvents);
 
       // Fetch club announcements from the backend
-      // const announcementsData = await clubService.getClubAnnouncements(id);
-      //
-      // // Format announcements
-      // const formattedAnnouncements = announcementsData.map((announcement) => ({
-      //   id: announcement.id,
-      //   title: announcement.title,
-      //   content: announcement.content,
-      //   clubId: announcement.club_id,
-      //   clubName: club.name,
-      //   date: announcement.created_at,
-      // }));
+      const announcementsData = await announcementService.getClubAnnouncements(
+        id
+      );
 
-      // setAnnouncements(formattedAnnouncements);
+      // Format announcements
+      const formattedAnnouncements = announcementsData.map((announcement) => ({
+        id: announcement.id,
+        title: announcement.title,
+        content: announcement.content,
+        club: announcement.club,
+        createdAt: announcement.createdAt,
+      }));
+
+      setAnnouncements(formattedAnnouncements);
 
       // Fetch club members from the backend
       const membersData = await clubService.getClubMemberDetails(id);
-
-      for(const member of membersData){
-        console.log("member"+member.club);
-      }
 
       // Format members
       const formattedMembers = membersData
@@ -197,7 +219,7 @@ const ClubDetail: React.FC = () => {
           user.id
         );
         console.log("registrationsData", registrationsData);
-        const registeredEventIds = registrationsData
+        const registeredEventIds = registrationsData;
 
         // Update events with registration status
         setEvents((prev) =>
@@ -324,19 +346,19 @@ const ClubDetail: React.FC = () => {
     );
   }
 
-  if (!club) {
-    return (
-      <div className="container py-10 text-center">
-        <h1 className="text-2xl font-bold mb-4">Club not found</h1>
-        <p className="mb-6">
-          The club you're looking for doesn't exist or has been removed.
-        </p>
-        <Link to="/clubs">
-          <Button>Back to Clubs</Button>
-        </Link>
-      </div>
-    );
-  }
+  // if (!club) {
+  //   return (
+  //     <div className="container py-10 text-center">
+  //       <h1 className="text-2xl font-bold mb-4">Club not found</h1>
+  //       <p className="mb-6">
+  //         The club you're looking for doesn't exist or has been removed.
+  //       </p>
+  //       <Link to="/clubs">
+  //         <Button>Back to Clubs</Button>
+  //       </Link>
+  //     </div>
+  //   );
+  // }
 
   const futureEvents = events.filter(
     (event) =>
@@ -351,13 +373,13 @@ const ClubDetail: React.FC = () => {
     <div className="container py-6 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{club.name}</h1>
-          <p className="text-gray-500">Category: {club.category}</p>
+          <h1 className="text-3xl font-bold text-gray-900">{club?.name}</h1>
+          <p className="text-gray-500">Category: {club?.category}</p>
         </div>
         <div className="flex items-center gap-4">
-          {memberStatus === "NONE" &&
-            user.id !== club.lead.id &&
-            user.role !== "ADMIN" && (
+          {user.role !== "LEAD" &&
+            user.role !== "ADMIN" &&
+            memberStatus === "NONE" && (
               <Button
                 onClick={handleJoinClub}
                 className="bg-border hover:bg-border/60 text-background"
@@ -372,9 +394,8 @@ const ClubDetail: React.FC = () => {
             </Button>
           )}
 
-          {((isLeader && user.id === club.lead.id) ||
-            user.role === "ADMIN") && (
-            <Link to={`/manage-clubs/${club.id}`}>
+          {(user.role === "LEAD" || user.role === "ADMIN") && (
+            <Link to={`/manage-clubs/${club?.id}`}>
               <Button
                 variant="outline"
                 className="bg-border hover:bg-border/60 text-background"
@@ -392,7 +413,7 @@ const ClubDetail: React.FC = () => {
             <CardTitle className="text-border">About</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-border">{club.description}</p>
+            <p className="text-border">{club?.description}</p>
 
             <div className="mt-6 space-y-3">
               <div className="flex items-center gap-2">
@@ -401,11 +422,15 @@ const ClubDetail: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                <p>{club.memberCount} Members</p>
+                <p>{club?.memberCount} Members</p>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 " />
-                <p>Founded: {format(new Date(club.createdAt), "MMMM yyyy")}</p>
+                <p>
+                  Founded:{" "}
+                  {club?.createdAt &&
+                    format(new Date(club?.createdAt), "MMMM yyyy")}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -416,14 +441,19 @@ const ClubDetail: React.FC = () => {
             <CardTitle>Membership</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {memberStatus === "APPROVED" ? (
+            {user.role === "ADMIN" || user.role === "LEAD" ? (
               <div className="text-center">
-                <div className="mb-4 bg-green-100 text-green-800 px-4 py-2 rounded-md">
-                  You are a member of this club
-                </div>
-                <p className="text-sm text-gray-500 mb-4">
-                  You have access to all club events and announcements.
+                <p className="mb-4 text-gray-700">
+                  Manage this club's events and announcements.
                 </p>
+                <Link to={`/manage-clubs/${club?.id}`}>
+                  <Button
+                    variant="outline"
+                    className="bg-border hover:bg-border/60 text-background w-full mt-10"
+                  >
+                    Manage Club
+                  </Button>
+                </Link>
               </div>
             ) : memberStatus === "PENDING" ? (
               <div className="text-center">
@@ -434,9 +464,16 @@ const ClubDetail: React.FC = () => {
                   The club leader will review your request soon.
                 </p>
               </div>
-            ) : memberStatus === "NONE" &&
-              user.id !== club.lead.id &&
-              user.role !== "ADMIN" ? (
+            ) : "APPROVED".localeCompare(memberStatus) == 0 ? (
+              <div className="text-center">
+                <div className="mb-4 bg-green-100 text-green-800 px-4 py-2 rounded-md">
+                  You are a member of this club
+                </div>
+                <p className="text-sm text-gray-500 mb-4">
+                  You have access to all club events and announcements.
+                </p>
+              </div>
+            ) : (
               <div className="text-center">
                 <p className="mb-4 text-gray-700">
                   Join this club to participate in events and receive
@@ -448,20 +485,6 @@ const ClubDetail: React.FC = () => {
                 >
                   Request to Join
                 </Button>
-              </div>
-            ) : (
-              <div className="text-center">
-                <p className="mb-4 text-gray-700">
-                  Manage this club's events and announcements.
-                </p>
-                <Link to={`/manage-clubs/${club.id}`}>
-                  <Button
-                    variant="outline"
-                    className="bg-border hover:bg-border/60 text-background w-full mt-10"
-                  >
-                    Manage Club
-                  </Button>
-                </Link>
               </div>
             )}
           </CardContent>
@@ -485,7 +508,6 @@ const ClubDetail: React.FC = () => {
                   key={event.id}
                   event={event}
                   onRegister={() => handleRegisterEvent(event.id)}
-                  isRegistered={event.isRegistered}
                   isLoading={registeringEvent === event.id}
                 />
               ))}
@@ -551,7 +573,10 @@ const ClubDetail: React.FC = () => {
                   <div>
                     <p className="font-medium">{member.profile.name}</p>
                     <p className="text-sm text-gray-500">
-                      Joined {member?.joinedAt ? format(member.joinedAt, "MMM yyyy") : "Unknown"}
+                      Joined{" "}
+                      {member?.joinedAt
+                        ? format(member.joinedAt, "MMM yyyy")
+                        : "Unknown"}
                     </p>
                   </div>
                 </div>

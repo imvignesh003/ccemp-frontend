@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { Club } from "@/types";
+import { Club, UserRole } from "@/types";
 import {
   Table,
   TableBody,
@@ -24,6 +24,8 @@ import CreateClub from "@/components/club/CreateClub";
 import clubService, { MemberData } from "@/services/clubService";
 import EditClub from "@/components/club/EditClub";
 import LoadingSpinner from "@/components/layout/Spinner.tsx";
+import adminService from "@/services/adminService";
+import { Profile } from "@/types/response";
 
 const ManageClubsPage: React.FC = () => {
   const { user, profile } = useAuth();
@@ -42,6 +44,8 @@ const ManageClubsPage: React.FC = () => {
   const [processingRequest, setProcessingRequest] = useState<number | null>(
     null
   );
+  const [leads, setLeads] = useState<Profile[]>([]);
+  
 
   const [isCreating, setIsCreating] = useState(false);
 
@@ -50,6 +54,7 @@ const ManageClubsPage: React.FC = () => {
   useEffect(() => {
     if (user && profile) {
       fetchClubs();
+      fetchAllLeads();
     }
   }, [user, profile]);
 
@@ -58,6 +63,40 @@ const ManageClubsPage: React.FC = () => {
       fetchClubDetails();
     }
   }, [selectedClub]);
+
+    const fetchAllLeads = async () => { 
+    if (!user || !profile) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Admin can see all clubs
+      const data = await adminService.getAllLeads();
+      console.log("Leads data:", data);
+      const formattedUsers: Profile[] = data.map((user:Profile) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role as UserRole,
+        contact: user.contact,
+      }));
+
+      setLeads(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching clubs:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          "Failed to loading Leads of CLubs. Please try again later.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchClubs = async () => { //done
     if (!user || !profile) {
@@ -344,9 +383,8 @@ const ManageClubsPage: React.FC = () => {
 
       {isCreating && (
         <CreateClub
-          selectedClub={selectedClub}
+          leads={leads}
           setIsCreating={setIsCreating}
-          setLoading={setLoading}
           fetchClubs={fetchClubs}
         />
       )}

@@ -26,8 +26,8 @@ const clubService = {
     return response.data;
   },
 
-  getMyClubs: async (id: number): Promise<Club[]> => {
-    const response = await api.get(`/clubs/${id}`);
+  getMyClubs: async (leadId: number): Promise<Club[]> => {
+    const response = await api.get(`/clubs/lead/${leadId}`);
     return response.data;
   },
   
@@ -71,15 +71,14 @@ const clubService = {
     const response = await api.get(`/clubs/${clubId}/status/${userId}`);
     return response.data;
   },
-
-
-
-
   
-  getUserClubs: async (): Promise<Club[]> => {
-    const response = await api.get('/clubs/user');
+  getUserClubs: async (userId: number): Promise<Club[]> => {
+    const response = await api.get(`/clubs/user/${userId}`);
     return response.data;
   },
+
+
+
   
   createClub: async (clubData: Partial<Club>): Promise<Club> => {
     console.log(clubData)
