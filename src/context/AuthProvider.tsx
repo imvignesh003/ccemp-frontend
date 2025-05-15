@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const authData = await authService.getCurrentUser();
           if (authData) {
-            setUser(authData.user);
+            setUser(authData.profile);
             setProfile(authData);
             setIsAuthenticated(true);
           } else {
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const authData = await authService.login(credentials);
         console.log("Login response:", authData);
         
-        setUser(authData.user);
+        setUser(authData.profile);
         setProfile(authData as LoginResponse);
         setIsAuthenticated(true);
         
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const userData: SignupRequest = signupData;
         const authData = await authService.signup(userData);
         
-        setUser(authData.user);
+        setUser(authData.profile);
         setProfile(authData as LoginResponse);
         setIsAuthenticated(true);
         

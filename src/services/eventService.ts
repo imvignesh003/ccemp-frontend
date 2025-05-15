@@ -1,5 +1,6 @@
 import { Events } from '@/pages/event/EventPage';
 import api from '@/services/api';
+import { RegistrationDetails } from '@/types';
 import { Event } from '@/types/response';
 
 export const eventService = {
@@ -31,7 +32,7 @@ export const eventService = {
         return response.data;
     },
 
-    getEventRegistrations: async (eventId: string): Promise<string[]> => {
+    getEventRegistrations: async (eventId: string): Promise<RegistrationDetails[]> => {
         const response = await api.get(`/events/registrations/${eventId}`);
         return response.data;
     },

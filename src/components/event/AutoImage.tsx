@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const AutoEventImage = ({ title, width = 512, height = 200, bgColor = '#A33B20', textColor = '#3B413C' }) => {
+interface AutoEventImageProps {
+  title: string;
+  width?: number;
+  height?: number;
+  bgColor?: string;
+  textColor?: string;
+}
+
+const AutoEventImage = ({ title, width = 512, height = 200, bgColor = '#A33B20', textColor = '#3B413C' }: AutoEventImageProps) => {
   const canvasRef = useRef(null);
   const [imageUrl, setImageUrl] = useState(null);
 

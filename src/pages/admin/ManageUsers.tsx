@@ -40,7 +40,7 @@ const ManageUsersPage: React.FC = () => {
 
 
   useEffect(() => {
-    if (profile?.user.role === 'ADMIN') {
+    if (profile?.profile.role === 'ADMIN') {
       fetchUsers();
     }
   }, [profile]);
@@ -122,7 +122,7 @@ const ManageUsersPage: React.FC = () => {
   });
   
   // Check if user has permission to manage user
-  if (!profile || profile?.user.role !== "ADMIN" ) {
+  if (!profile || profile?.profile.role !== "ADMIN" ) {
     return (
       <div className="container py-10 text-center">
         <h1 className="text-2xl font-bold mb-4">Access Denied</h1>

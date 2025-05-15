@@ -10,6 +10,7 @@ import { format, parseISO } from "date-fns";
 import AutoEventImage from "@/components/event/AutoImage.tsx";
 import { Events } from "./EventPage.tsx";
 
+
 const EventDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -73,13 +74,14 @@ const EventDetail: React.FC = () => {
 
       // Fetch attendees
       try {
-        const registrations = await eventService.getEventRegistrations(id);
+        const registrations  = await eventService.getEventRegistrations(id);
+        console.log("Registrations:", registrations);
 
-        if (registrations && registrations.length > 0) {
+        if (registrations) {
           // Assuming registrations include user profile information
           const attendeesList = registrations.map((reg) => ({
-            id: reg.user_id || reg.userId,
-            name: reg.user_name || reg.userName || "Anonymous",
+            id: reg.userId,
+            name: reg.userName || "Anonymous",
           }));
 
           setAttendees(attendeesList);
@@ -264,9 +266,9 @@ const EventDetail: React.FC = () => {
                     {attendees.map((attendee) => (
                       <div
                         key={attendee.id}
-                        className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full"
+                        className="flex items-center gap-2 bg-secondary  pr-3 pl-1.5 py-1 rounded-full"
                       >
-                        <span className="w-6 h-6 rounded-full bg-ccem-purple text-white flex items-center justify-center text-xs">
+                        <span className="w-6 h-6 rounded-full bg-border text-background flex items-center justify-center text-xs">
                           {attendee.name.charAt(0)}
                         </span>
                         <span className="text-sm">{attendee.name}</span>

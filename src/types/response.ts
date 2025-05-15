@@ -6,8 +6,6 @@ export type Profile = {
     email: string;
     role: 'STUDENT' | 'LEAD' | 'ADMIN';
     contact:string;
-    created_at?: string;
-    updated_at?: string;
 };
 export type User = {
   id : number;
@@ -30,7 +28,7 @@ export type User = {
 export type LoginResponse = {
   token: string;
   refresh_token: string;
-  user: User;
+  profile: Profile;
 }
 
   

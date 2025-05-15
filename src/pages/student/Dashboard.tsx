@@ -63,7 +63,7 @@ const StudentDashboard: React.FC = () => {
         ...prev,
         {
           userId: user.id,
-          userName: profile?.user.name || "User",
+          userName: profile?.profile.name || "User",
           clubId,
           joinedAt: new Date().toISOString(),
           status: "PENDING"
@@ -112,7 +112,7 @@ const StudentDashboard: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome, {profile?.user.name || "User"}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome, {profile?.profile.name || "User"}</h1>
           <p className="text-gray-500">Here's what's happening at your campus</p>
         </div>
         <Link to="/events">

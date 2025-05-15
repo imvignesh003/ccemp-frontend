@@ -31,7 +31,7 @@ const AdminDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    if (profile?.user.role === "ADMIN") {
+    if (profile?.profile.role === "ADMIN") {
       fetchStats();
     }
   }, [profile]);
@@ -60,7 +60,7 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  if (profile?.user.role !== "ADMIN") {
+  if (profile?.profile.role !== "ADMIN") {
     return (
       <div className="container py-10 text-center">
         <h1 className="text-2xl font-bold mb-4">Access Denied</h1>

@@ -39,7 +39,7 @@ const NameCard = ({ name, email, contact}: any) => {
           <p className="text-gray-500">{email}</p>
           <p className="text-gray-500">{contact}</p>
           <p className="mt-1 text-sm bg-ccem-purple/10 text-ccem-purple px-2 py-1 rounded-full inline-block">
-            {profile?.user.role}
+            {profile?.profile.role}
           </p>
         </div>
 

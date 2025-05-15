@@ -51,7 +51,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const DashboardSelector = () => {
   const { profile } = useAuth();
   console.log("At dbSelector : Profile:", profile);
-  switch (profile?.user.role) {
+  switch (profile?.profile.role) {
     case "STUDENT":
       return <StudentDashboard />;
     case "LEAD":
@@ -73,7 +73,7 @@ const RoleProtectedRoute = ({
 }) => {
   const { profile } = useAuth();
 
-  if (!profile || !allowedRoles.includes(profile?.user.role)) {
+  if (!profile || !allowedRoles.includes(profile?.profile.role)) {
     return <Navigate to="/" />;
   }
 

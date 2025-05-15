@@ -19,7 +19,6 @@ import { Announcement } from "@/types/response";
 
 const ClubDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  // const club: Club | null = useLocation().state?.club as Club;
   const { user } = useAuth();
   const { toast } = useToast();
   const [club, setClub] = useState<Club | null>(null);
@@ -254,6 +253,7 @@ const ClubDetail: React.FC = () => {
 
     try {
       try {
+        if (!club?.id) throw new Error("Club ID is undefined");
         const response = await clubService.joinClub(club.id, user.id as number);
         if (response) {
           setMemberStatus("PENDING");
@@ -567,7 +567,7 @@ const ClubDetail: React.FC = () => {
             {members.map((member) => (
               <Card key={member.profile.id} className="overflow-hidden">
                 <div className="p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-ccem-purple text-white flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-secondary text-background flex items-center justify-center">
                     {member.profile.name.charAt(0)}
                   </div>
                   <div>

@@ -40,8 +40,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, active }) =>
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const { profile } = useAuth();
-  const isStudent = profile?.user.role === "STUDENT";
-  const isClubLeader = profile?.user.role === "LEAD" || profile?.user.role === "ADMIN";
+  const isStudent = profile?.profile.role === "STUDENT";
+  const isClubLeader = profile?.profile.role === "LEAD" || profile?.profile.role === "ADMIN";
 
   return (
     <div className="bg-secondary w-64 h-[calc(100vh-4rem)] border-r border-border flex flex-col overflow-y-auto">

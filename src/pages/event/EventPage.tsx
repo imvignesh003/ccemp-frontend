@@ -51,16 +51,16 @@ const EventsPage: React.FC = () => {
   const [registeringEvent, setRegisteringEvent] = useState<string | null>(null);
   // const [registeredEvents, setRegisteredEvents] = useState<string[]>([]);
   const isClubLeader =
-    profile?.user.role === "LEAD" || profile?.user.role === "ADMIN";
+    profile?.profile.role === "LEAD" || profile?.profile.role === "ADMIN";
 
 
 
 useEffect(() => {
   const fetchAll = async () => {
-    if (profile && profile.user && profile.user.id) {
+    if (profile && profile.profile && profile.profile.id) {
       try {
         const registeredEvents :number[] = await eventService.getUserRegistrations(
-          profile.user.id.toString()
+          profile.profile.id.toString()
         ).then((res) => {
           return res.map((event) => Number(event));
         });
@@ -132,7 +132,7 @@ useEffect(() => {
       // setEvents(formattedEvents);
 
       // If user is logged in, fetch user's registrations
-      if (profile && profile.user && profile.user.id) {
+      if (profile && profile.profile && profile.profile.id) {
         try {
           // Set my events
           const myEventsList = formattedEvents.filter(
@@ -148,7 +148,7 @@ useEffect(() => {
           if (isClubLeader) {
             try {
               // Fetch clubs where user is a leader
-              const userClubs = await clubService.getMyClubs(profile.user.id);
+              const userClubs = await clubService.getMyClubs(Number(profile.profile.id));
 
               if (userClubs && userClubs.length > 0) {
                 const clubIds = userClubs.map((club) => club.id);
@@ -179,7 +179,7 @@ useEffect(() => {
   };
 
   const handleRegister = async (eventId: string) => {
-    if (!profile || !profile.user || !profile.user.id) {
+    if (!profile || !profile.profile || !profile.profile.id) {
       toast({
         title: "Authentication required",
         description: "Please log in to register for events.",
@@ -193,7 +193,7 @@ useEffect(() => {
       // Call the API to register for the event
       const response = await eventService.registerForEvent(
         eventId,
-        profile.user.id.toString()
+        profile.profile.id.toString()
       );
 
       if (!response) {

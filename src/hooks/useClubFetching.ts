@@ -27,12 +27,12 @@ export const useClubsFetching = (clubIdParam: string | null) => {
       setIsLoading(true);
       let fetchedClubs: Club[] = [];
       
-      if (profile?.user.role === 'ADMIN') {
+      if (profile?.profile.role === 'ADMIN') {
         // Admins can see all clubs
         fetchedClubs = await clubService.getAllClubs();
-      } else if (profile?.user.role === 'LEAD') {
+      } else if (profile?.profile.role === 'LEAD') {
         // Club leaders see their clubs
-        fetchedClubs = await clubService.getMyClubs(profile.user.id);
+        fetchedClubs = await clubService.getMyClubs(Number(profile.profile.id));
       } else {
         // Students don't see any clubs (they can't create announcements)
         setClubs([]);

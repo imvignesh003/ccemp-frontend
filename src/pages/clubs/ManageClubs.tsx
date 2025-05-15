@@ -109,11 +109,11 @@ const ManageClubsPage: React.FC = () => {
 
       let data;
 
-      if (profile.user.role === "ADMIN") {
+      if (profile.profile.role === "ADMIN") {
         data = await clubService.getAllClubs();
         console.log(data);
       } else {
-        data = await clubService.getMyClubs(profile.user.id);
+        data = await clubService.getMyClubs(Number(profile.profile.id));
         console.log(data);
       }
 
@@ -346,8 +346,8 @@ const ManageClubsPage: React.FC = () => {
 
   if (
     profile &&
-    profile.user.role !== "LEAD" &&
-    profile.user.role !== "ADMIN"
+    profile.profile.role !== "LEAD" &&
+    profile.profile.role !== "ADMIN"
   ) {
     return (
       <div className="container py-10 text-center">

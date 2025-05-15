@@ -27,6 +27,12 @@ export interface ExtendedClub extends Club {
   status?: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
+
+export interface RegistrationDetails{
+  userId : string;
+  userName : string;
+}
+
 // export interface Event {
 //   id: string;
 //   title: string;

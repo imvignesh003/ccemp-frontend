@@ -52,7 +52,7 @@ const Navbar: React.FC = () => {
                 >
                   <Avatar className="h-12 w-12">
                     <AvatarFallback>
-                      {profile?.user.name?.charAt(0)}
+                      {profile?.profile.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -61,10 +61,10 @@ const Navbar: React.FC = () => {
                 <DropdownMenuLabel className="hover:bg-secondary">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {profile?.user.name}
+                      {profile?.profile.name}
                     </p>
-                    <p className="text-xs">{profile?.user.email}</p>
-                    <p className="text-xs font-medium">{profile?.user.role}</p>
+                    <p className="text-xs">{profile?.profile.email}</p>
+                    <p className="text-xs font-medium">{profile?.profile.role}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-border" />

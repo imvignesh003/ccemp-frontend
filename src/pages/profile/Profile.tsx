@@ -6,16 +6,16 @@ import ChangePassword from "./ChangePassword";
 
 const ProfilePage: React.FC = () => {
   const { user, profile } = useAuth();
-  const [name, setName] = useState(profile?.user.name || "");
-  const [email, setEmail] = useState(profile?.user.email || "");
+  const [name, setName] = useState(profile?.profile.name || "");
+  const [email, setEmail] = useState(profile?.profile.email || "");
 
-  const [contact, setContact] = useState(profile?.user.contact || "");
+  const [contact, setContact] = useState(profile?.profile.contact || "");
 
   useEffect(() => {
     if (profile) {
-      setName(profile.user.name || "");
-      setEmail(profile.user.email || "");
-      setContact(profile.user.contact || "");
+      setName(profile.profile.name || "");
+      setEmail(profile.profile.email || "");
+      setContact(profile.profile.contact || "");
     }
   }, [profile]);
 

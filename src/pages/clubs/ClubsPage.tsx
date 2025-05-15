@@ -34,8 +34,8 @@ const ClubsPage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isAdmin = profile?.user.role === "ADMIN";
-  const isClubLeader = profile?.user.role === "LEAD" || isAdmin;
+  const isAdmin = profile?.profile.role === "ADMIN";
+  const isClubLeader = profile?.profile.role === "LEAD" || isAdmin;
 
   useEffect(() => {
     fetchClubs();
@@ -94,12 +94,12 @@ const ClubsPage: React.FC = () => {
 
         setClubs(formattedClubs);
         setManagedClubs(
-          formattedClubs.filter((club) => Number(club.lead.id) === profile.user.id)
+          formattedClubs.filter((club) => Number(club.lead.id) === Number(profile.profile.id))
         );
         const myClubsData = await Promise.all(
           formattedClubs.map(async (club) => {
             const memberData = await clubService.getClubMemberDetails(club.id);
-            return memberData.some((member) => member.profile.id === profile.user.id)
+            return memberData.some((member) => member.profile.id === Number(profile.profile.id))
               ? club
               : null;
           })

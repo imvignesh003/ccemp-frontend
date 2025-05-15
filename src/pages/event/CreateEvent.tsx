@@ -187,7 +187,7 @@ const CreateEvent: React.FC = () => {
   // Check if user can create events
   if (
     !user ||
-    (profile?.user.role !== "LEAD" && profile?.user.role !== "ADMIN")
+    (profile?.profile.role !== "LEAD" && profile?.profile.role !== "ADMIN")
   ) {
     return (
       <div className="container py-10 text-center">
