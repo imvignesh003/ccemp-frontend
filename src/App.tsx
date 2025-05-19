@@ -8,7 +8,7 @@ import { useAuth } from "./hooks/useAuth";
 
 import AppLayout from "./components/layout/AppLayout";
 
-// Pages
+
 import Login from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 import StudentDashboard from "./pages/student/Dashboard";

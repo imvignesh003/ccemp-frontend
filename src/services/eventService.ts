@@ -9,7 +9,10 @@ export const eventService = {
         const response = await api.post('/events', eventData);
         return response.data;
     },
-
+    getAllEventsCount: async (): Promise<number> => {
+        const response = await api.get('/events/count');
+        return response.data;
+    },
     getAllEvents: async (): Promise<Events[]> => {
         const response = await api.get('/events');
         return response.data;

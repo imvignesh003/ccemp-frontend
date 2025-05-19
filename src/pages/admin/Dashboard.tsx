@@ -14,10 +14,12 @@ import {
   Calendar,
   Bell,
   Briefcase,
-  UserPlus,
   Shield,
 } from "lucide-react";
 import DashCard from "@/components/ui/DashCard";
+import adminService from "@/services/adminService";
+import clubService from "@/services/clubService";
+import { eventService } from "@/services/eventService";
 // import AdminAnalytics from "../../components/analytics/AdminAnalytics";
 
 const AdminDashboard: React.FC = () => {
@@ -26,8 +28,6 @@ const AdminDashboard: React.FC = () => {
     userCount: 0,
     clubCount: 0,
     eventCount: 0,
-    pendingLeaderRequests: 0,
-    pendingClubs: 0,
   });
 
   useEffect(() => {
@@ -39,21 +39,20 @@ const AdminDashboard: React.FC = () => {
   const fetchStats = async () => {
     try {
       // Fetch user count
-      const userCount = 5;
+
+      const userCount = await adminService.getAllUsersCount() - 1;
 
       // Fetch club count
-      const clubCount = 2;
+      const clubCount = await clubService.getClubsCount();
 
       // Fetch event count
-      const eventCount = 15;
+      const eventCount = await eventService.getAllEventsCount();
 
       // Set the stats
       setStats({
         userCount: userCount || 0,
         clubCount: clubCount || 0,
-        eventCount: eventCount || 0,
-        pendingLeaderRequests: 0, // To be implemented in the future
-        pendingClubs: 0, // To be implemented in the future
+        eventCount: eventCount || 0
       });
     } catch (error) {
       console.error("Error fetching admin stats:", error);
@@ -150,7 +149,7 @@ const AdminDashboard: React.FC = () => {
             </Link>
           </CardContent>
         </Card>
-
+{/* 
         <Card className="col-span-1 bg-secondary/80">
           <CardHeader>
             <CardTitle className="text-border text-3xl">System Overview</CardTitle>
@@ -179,7 +178,7 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

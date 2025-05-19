@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import {
-  getMyClubsAsLeader,
-  getPendingRequestsForLeader,
-  approveClubMembership,
-  events,
-} from "../../data/mockData";
-import { Club, ClubMember, Event } from "../../types";
+import { Club } from "../../types";
+import { Events } from "@/pages/event/EventPage";
 import {
   Card,
   CardContent,
@@ -21,7 +16,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../components/ui/tabs";
-import { useToast } from "../../components/ui/use-toast";
 import {
   Table,
   TableBody,
@@ -30,78 +24,107 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { Check, X } from "lucide-react";
 import DashCard from "@/components/ui/DashCard";
+import { format, parseISO } from "date-fns";
+import clubService from "@/services/clubService";
+import { eventService } from "@/services/eventService";
+import LoadingSpinner from "@/components/layout/Spinner";
 // import ClubLeaderAnalytics from "../../components/analytics/ClubLeaderAnalytics";
 
 const LeaderDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [myClubs, setMyClubs] = useState<Club[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<ClubMember[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<Events[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (user) {
-      const clubs = getMyClubsAsLeader(user.id);
-      setMyClubs(clubs);
-      setPendingRequests(getPendingRequestsForLeader(user.id));
+    const fetchClubs = async () => {
+      if (user) {
+        setLoading(true);
+        const clubs = await clubService.getMyClubs(user.id);
+        setMyClubs(clubs);
+        const myClubIds = clubs.map((club) => club.id);
+        const eventsData = await eventService.getAllEvents();
 
-      // Get upcoming events for my clubs
-      const myClubIds = clubs.map((club) => club.id);
-      const now = new Date();
-      const filteredEvents = events
-        .filter(
-          (event) =>
-            myClubIds.includes(event.clubId) && new Date(event.date) > now
-        )
-        .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        const registeredEvents: number[] = await eventService
+          .getUserRegistrations(user.id)
+          .then((res) => {
+            return res.map((event) => Number(event));
+          });
+
+        const registrationCountsPromises = eventsData.map(async (event) => {
+          try {
+            const count = await eventService.getRegistrationCount(event.id);
+            return {
+              eventId: event.id,
+              count: count || 0,
+            };
+          } catch (error) {
+            console.error(
+              `Error fetching registration count for event ${event.id}:`,
+              error
+            );
+            return {
+              eventId: event.id,
+              count: 0,
+            };
+          }
+        });
+
+        const registrationCounts = await Promise.all(
+          registrationCountsPromises
         );
-      setUpcomingEvents(filteredEvents);
 
-      // Select the first club by default for analytics
-      if (clubs.length > 0 && !selectedClub) {
-        setSelectedClub(clubs[0]);
+        // Format events data
+        const events = eventsData.map((event) => {
+          const countObj = registrationCounts.find(
+            (c) => c.eventId === event.id
+          );
+          return {
+            id: event.id,
+            title: event.title,
+            description: event.description,
+            dateTime: event.dateTime,
+            location: event.location,
+            club: event.club,
+            maxParticipants: event.maxParticipants,
+            registeredCount: countObj ? countObj.count : 0,
+            isRegistered: registeredEvents.includes(Number(event.id)),
+          };
+        });
+        console.log("events", events);
+
+        const now = new Date();
+        const filteredEvents = events
+          .filter(
+            (event: Events) =>
+              myClubIds.includes(event.club.id) &&
+              new Date(format(parseISO(event.dateTime), "yyyy-MM-dd")) > now
+          )
+          .sort(
+            (a, b) =>
+              new Date(format(parseISO(a.dateTime), "yyyy-MM-dd")).getTime() -
+              new Date(format(parseISO(b.dateTime), "yyyy-MM-dd")).getTime()
+          );
+        setUpcomingEvents(filteredEvents);
+
+        const pendingRequestsCount =
+          await clubService.getAllPendingMembersCount();
+        setPendingRequests(pendingRequestsCount);
+
+        if (clubs.length > 0 && !selectedClub) {
+          setSelectedClub(clubs[0]);
+        }
       }
-    }
+      setLoading(false);
+    };
+    fetchClubs();
   }, [user, selectedClub]);
-
-  const handleApproveRequest = (userId: string, clubId: string) => {
-    approveClubMembership(userId, clubId);
-
-    // Update UI
-    setPendingRequests((prev) =>
-      prev.filter((req) => !(req.userId === userId && req.clubId === clubId))
-    );
-
-    // Show success message
-    toast({
-      title: "Request Approved",
-      description: "The member has been approved and added to the club.",
-    });
-  };
-
-  const handleRejectRequest = (userId: string, clubId: string) => {
-    // In a real app, this would call an API
-    setPendingRequests((prev) =>
-      prev.filter((req) => !(req.userId === userId && req.clubId === clubId))
-    );
-
-    toast({
-      title: "Request Rejected",
-      description: "The club join request has been rejected.",
-    });
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  const handleClubSelect = (club: Club) => {
-    setSelectedClub(club);
-  };
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="space-y-6">
@@ -132,114 +155,18 @@ const LeaderDashboard: React.FC = () => {
         <DashCard
           cardTitle="Pending Requests"
           cardContent="Club join requests awaiting approval"
-          count={pendingRequests.length}
+          count={pendingRequests}
         ></DashCard>
       </div>
 
-      {/* Club Analytics Section */}
-      {selectedClub && (
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2 mb-4">
-            {myClubs.map((club) => (
-              <Button
-                key={club.id}
-                variant={selectedClub.id === club.id ? "default" : "outline"}
-                className={
-                  selectedClub.id === club.id
-                    ? "bg-ccem-purple hover:bg-ccem-purple/90"
-                    : ""
-                }
-                onClick={() => handleClubSelect(club)}
-              >
-                {club.name}
-              </Button>
-            ))}
-          </div>
-          {/* <ClubLeaderAnalytics clubId={selectedClub.id} clubName={selectedClub.name} /> */}
-        </div>
-      )}
-
-      <Tabs defaultValue="pending" className="space-y-4">
+      <Tabs defaultValue="upcoming" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="pending">Pending Requests</TabsTrigger>
           <TabsTrigger value="upcoming">Upcoming Events</TabsTrigger>
           <TabsTrigger value="my-clubs">My Clubs</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pending" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Join Requests</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {pendingRequests.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Club</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pendingRequests.map((request) => {
-                      const club = myClubs.find((c) => c.id === request.clubId);
-                      return (
-                        <TableRow key={`${request.userId}-${request.clubId}`}>
-                          <TableCell className="font-medium">
-                            {request.userName}
-                          </TableCell>
-                          <TableCell>{club?.name}</TableCell>
-                          <TableCell>{formatDate(request.joinedAt)}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="border-green-500 text-green-600 hover:bg-green-50"
-                                onClick={() =>
-                                  handleApproveRequest(
-                                    request.userId,
-                                    request.clubId
-                                  )
-                                }
-                              >
-                                <Check size={16} />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="border-red-500 text-red-600 hover:bg-red-50"
-                                onClick={() =>
-                                  handleRejectRequest(
-                                    request.userId,
-                                    request.clubId
-                                  )
-                                }
-                              >
-                                <X size={16} />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-gray-500">
-                    No pending requests at the moment.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="upcoming" className="space-y-4">
-          <Card>
+          <Card className="bg-secondary/80">
             <CardHeader>
               <CardTitle>Upcoming Events</CardTitle>
             </CardHeader>
@@ -261,16 +188,18 @@ const LeaderDashboard: React.FC = () => {
                         <TableCell className="font-medium">
                           <Link
                             to={`/events/${event.id}`}
-                            className="hover:text-ccem-purple"
+                            className="hover:text-background"
                           >
                             {event.title}
                           </Link>
                         </TableCell>
-                        <TableCell>{event.clubName}</TableCell>
-                        <TableCell>{formatDate(event.date)}</TableCell>
+                        <TableCell>{event.club.name}</TableCell>
+                        <TableCell>
+                          {format(parseISO(event.dateTime), "yyyy-MM-dd")}
+                        </TableCell>
                         <TableCell>{event.location}</TableCell>
                         <TableCell className="text-right">
-                          {event.registeredCount}/{event.registrationLimit}
+                          {event.registeredCount} / {event.maxParticipants}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -280,7 +209,7 @@ const LeaderDashboard: React.FC = () => {
                 <div className="text-center py-6">
                   <p className="text-gray-500">No upcoming events scheduled.</p>
                   <Link to="/create-event">
-                    <Button className="mt-2 bg-ccem-purple hover:bg-ccem-purple/90">
+                    <Button className="mt-2 bg-secondary text-background hover:bg-secondary/70">
                       Create an Event
                     </Button>
                   </Link>

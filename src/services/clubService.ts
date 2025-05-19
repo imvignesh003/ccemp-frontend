@@ -25,7 +25,10 @@ const clubService = {
     const response = await api.get('/clubs');
     return response.data;
   },
-
+  getClubsCount: async (): Promise<number> => {
+    const response = await api.get('/clubs/count');
+    return response.data;
+  },
   getMyClubs: async (leadId: number): Promise<Club[]> => {
     const response = await api.get(`/clubs/lead/${leadId}`);
     return response.data;
@@ -44,6 +47,11 @@ const clubService = {
   getClubMemberDetails: async(id:string): Promise<MemberData[]> => {
     const response = await api.get(`/clubs/${id}/members`);
     console.log("response"+ response.data);
+    return response.data;
+  },
+
+  getAllPendingMembersCount: async (): Promise<number> => {
+    const response = await api.get('/clubs/pending/count');
     return response.data;
   },
 

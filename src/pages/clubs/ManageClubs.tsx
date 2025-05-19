@@ -2,12 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast.tsx";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { Club, UserRole } from "@/types";
 import {
@@ -45,7 +40,6 @@ const ManageClubsPage: React.FC = () => {
     null
   );
   const [leads, setLeads] = useState<Profile[]>([]);
-  
 
   const [isCreating, setIsCreating] = useState(false);
 
@@ -54,7 +48,9 @@ const ManageClubsPage: React.FC = () => {
   useEffect(() => {
     if (user && profile) {
       fetchClubs();
-      fetchAllLeads();
+      if(profile.profile.role === "ADMIN") {
+        fetchAllLeads();
+      }
     }
   }, [user, profile]);
 
@@ -64,7 +60,7 @@ const ManageClubsPage: React.FC = () => {
     }
   }, [selectedClub]);
 
-    const fetchAllLeads = async () => { 
+  const fetchAllLeads = async () => {
     if (!user || !profile) {
       setLoading(false);
       return;
@@ -74,17 +70,17 @@ const ManageClubsPage: React.FC = () => {
       setLoading(true);
 
       // Admin can see all clubs
-      const data = await adminService.getAllLeads();
-      console.log("Leads data:", data);
-      const formattedUsers: Profile[] = data.map((user:Profile) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role as UserRole,
-        contact: user.contact,
-      }));
+        const data = await adminService.getAllLeads();
+        console.log("Leads data:", data);
+        const formattedUsers: Profile[] = data.map((user: Profile) => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role as UserRole,
+          contact: user.contact,
+        }));
 
-      setLeads(formattedUsers);
+        setLeads(formattedUsers);
     } catch (error) {
       console.error("Error fetching clubs:", error);
       toast({
@@ -98,7 +94,8 @@ const ManageClubsPage: React.FC = () => {
     }
   };
 
-  const fetchClubs = async () => { //done
+  const fetchClubs = async () => {
+    //done
     if (!user || !profile) {
       setLoading(false);
       return;
@@ -122,7 +119,8 @@ const ManageClubsPage: React.FC = () => {
         throw new Error("Error fetching clubs: Eoor Fetching Clubs");
       }
 
-      if (data) { //done
+      if (data) {
+        //done
         // Get member counts
         const memberCountsPromises = data.map(async (club) => {
           const count = await clubService.getClubMembersCount(club.id);
@@ -142,7 +140,7 @@ const ManageClubsPage: React.FC = () => {
             description: club.description,
             category: club.category,
             createdAt: club.createdAt,
-            lead: club.lead, 
+            lead: club.lead,
             memberCount: countObj ? countObj.count : 0,
           };
         });
@@ -167,7 +165,8 @@ const ManageClubsPage: React.FC = () => {
     }
   };
 
-  const fetchClubDetails = async () => { //done
+  const fetchClubDetails = async () => {
+    //done
     if (!selectedClub) return;
 
     try {
@@ -177,9 +176,7 @@ const ManageClubsPage: React.FC = () => {
       console.log(data);
 
       // Filter and format pending membership requests
-      const pendingData = data.filter(
-        (member) => member.status === "PENDING"
-      );
+      const pendingData = data.filter((member) => member.status === "PENDING");
 
       const formattedRequests = pendingData.map((member) => ({
         id: member.id,
@@ -190,12 +187,10 @@ const ManageClubsPage: React.FC = () => {
       }));
 
       setPendingRequests(formattedRequests);
-      console.log("Pending Requests",formattedRequests);
+      console.log("Pending Requests", formattedRequests);
 
       // Filter and format approved members
-      const membersData = data.filter(
-        (member) => member.status === "APPROVED"
-      );
+      const membersData = data.filter((member) => member.status === "APPROVED");
 
       const formattedMembers = membersData.map((member) => ({
         id: member.id,
@@ -228,17 +223,16 @@ const ManageClubsPage: React.FC = () => {
     try {
       setProcessingRequest(userId);
 
-
       const response = await clubService.approve(clubId, userId);
       console.log(response);
       if (!response) {
         throw new Error("Error approving request");
-      }  
-
-    
+      }
 
       // Update UI
-      setPendingRequests((prev) => prev.filter((req) => req.profile.id !== userId));
+      setPendingRequests((prev) =>
+        prev.filter((req) => req.profile.id !== userId)
+      );
 
       // Add to members list
       const approvedMember = pendingRequests.find(
@@ -271,7 +265,6 @@ const ManageClubsPage: React.FC = () => {
     try {
       setProcessingRequest(userId);
 
-
       const response = await clubService.reject(clubId, userId);
       console.log(response);
       if (!response) {
@@ -279,7 +272,9 @@ const ManageClubsPage: React.FC = () => {
       }
 
       // Update UI
-      setPendingRequests((prev) => prev.filter((req) => req.profile.id !== userId));
+      setPendingRequests((prev) =>
+        prev.filter((req) => req.profile.id !== userId)
+      );
 
       toast({
         title: "Request rejected",
@@ -303,7 +298,7 @@ const ManageClubsPage: React.FC = () => {
 
       const response = await clubService.remove(clubId, userId);
       console.log(response);
-      if(!response){
+      if (!response) {
         throw new Error("Error removing member");
       }
 
@@ -359,9 +354,7 @@ const ManageClubsPage: React.FC = () => {
   }
 
   if (loading) {
-    return (
-        <LoadingSpinner />
-    );
+    return <LoadingSpinner />;
   }
 
   return (
@@ -372,13 +365,15 @@ const ManageClubsPage: React.FC = () => {
           <p className="text-gray-500">Manage your clubs and memberships</p>
         </div>
 
-        <Button
-          onClick={() => setIsCreating(!isCreating)}
-          className="bg-border hover:bg-border/80 text-background flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Create New Club
-        </Button>
+        {profile?.profile.role === "ADMIN" && (
+          <Button
+            onClick={() => setIsCreating(!isCreating)}
+            className="bg-border hover:bg-border/80 text-background flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Create New Club
+          </Button>
+        )}
       </div>
 
       {isCreating && (
@@ -502,19 +497,18 @@ const ManageClubsPage: React.FC = () => {
                           <TableBody>
                             {pendingRequests.map((pending) => (
                               <TableRow
-                                key={`${pending.profile .id}-${pending.club.id}`}
+                                key={`${pending.profile.id}-${pending.club.id}`}
                               >
                                 <TableCell className="font-medium">
                                   {pending.profile.name}
                                 </TableCell>
                                 <TableCell>
-                                  {pending.status === "PENDING" && pending.joinedAt &&
-                                  format(
-                                    new Date(pending.joinedAt),
-                                    "MMM d, yyyy"
-                                  )
-                                  }
-                            
+                                  {pending.status === "PENDING" &&
+                                    pending.joinedAt &&
+                                    format(
+                                      new Date(pending.joinedAt),
+                                      "MMM d, yyyy"
+                                    )}
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-2">
@@ -588,10 +582,11 @@ const ManageClubsPage: React.FC = () => {
                                   {member.profile.name}
                                 </TableCell>
                                 <TableCell>
-                                  {member.joinedAt && format(
-                                    new Date(member.joinedAt),
-                                    "MMM d, yyyy"
-                                  )}
+                                  {member.joinedAt &&
+                                    format(
+                                      new Date(member.joinedAt),
+                                      "MMM d, yyyy"
+                                    )}
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <Button
@@ -624,7 +619,10 @@ const ManageClubsPage: React.FC = () => {
 
                     <div className="pt-4">
                       <Link to={`/clubs/${selectedClub.id}`}>
-                        <Button variant="outline" className="w-full bg-border hover:bg-border/60 text-background">
+                        <Button
+                          variant="outline"
+                          className="w-full bg-border hover:bg-border/60 text-background"
+                        >
                           View Club Page
                         </Button>
                       </Link>

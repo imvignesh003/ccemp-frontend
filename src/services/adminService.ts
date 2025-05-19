@@ -14,6 +14,10 @@ const adminService = {
         const response = await api.get('/admin/profiles');
         return response.data;
     },
+    getAllUsersCount : async (): Promise<number> => {
+        const response = await api.get('/admin/profiles/count');
+        return response.data;
+    },
     changeUserRole : async (id:string, role:UserRole) : Promise<boolean> => {
         const response = await api.put(`/admin/profile/${id}`,{ role });
         return response.data;
